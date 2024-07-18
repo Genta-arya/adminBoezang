@@ -4,10 +4,12 @@ import HeaderProduct from "./components/HeaderProduct";
 
 const MainProduk = () => {
   return (
-    <main>
+    <main className="">
       {" "}
-      <HeaderProduct />
-      <ListProduct />
+
+        <HeaderProduct />
+        <ListProduct />
+
     </main>
   );
 };

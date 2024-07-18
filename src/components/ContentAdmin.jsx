@@ -12,6 +12,9 @@ const ContentAdmin = () => {
         return <MainProduk />;
       case "event":
         return <div>Ini adalah konten untuk Event & Promo</div>;
+
+      case "quotest":
+        return <div>Ini adalah konten quotes</div>;
       case "signout":
         return (
           <div>
@@ -23,7 +26,7 @@ const ContentAdmin = () => {
     }
   };
 
-  return <div className="flex-1 p-6 bg-gray-100">{renderContent()}</div>;
+  return <div className="flex-1 p-6 h-dvh">{renderContent()}</div>;
 };
 
 export default ContentAdmin;

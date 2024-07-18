@@ -16,6 +16,30 @@ export const createProduct = async (data) => {
   }
 };
 
+
+
+export const updateProduct = async (id,data) => {
+  try {
+    // Mengirim data ke server
+    const response = await axiosConfig.put(`/product/data/${id}`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data", // Header untuk multipart/form-data
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading product:", error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+
 export const getProduct = async (kategori = null) => {
   let url = "/product/data"; // Hanya menggunakan path karena baseURL sudah ada di axiosConfig
 

@@ -3,112 +3,33 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css"; // Import React Quill styles
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { createProduct } from "../../../services/Products/Products";
-import { NumberFormatBase } from "react-number-format";
+
+import { DataColor } from "../../../TypeColor";
+import useCreateProduct from "../../../Hooks/Products/useCreateProduct";
 
 const ModalProduct = () => {
-  const [category, setCategory] = useState("");
-  const [capacities, setCapacities] = useState([]); // Array for capacities
-  const [colors, setColors] = useState([]); // Array for colors
-  const [currentColor, setCurrentColor] = useState(""); // State for current color input
-  const [description, setDescription] = useState("");
-  const [image, setImage] = useState(null);
-  const [productName, setProductName] = useState("");
-  const [price, setPrice] = useState("");
-  const handleCategoryChange = (event) => {
-    setCategory(event.target.value);
-    if (event.target.value !== "iphone") {
-      setCapacities([]); // Clear capacities if not iPhone
-      setColors([]); // Clear colors if not iPhone
-    }
-  };
-
-  const handleImageChange = (event) => {
-    if (event.target.files.length > 0) {
-      const selectedImage = event.target.files[0];
-      if (selectedImage.size > 10 * 1024 * 1024) {
-        // 10MB in bytes
-        toast.error("Ukuran gambar tidak boleh lebih dari 10MB");
-        setImage(null); // Clear the image if it exceeds the limit
-      } else {
-        setImage(selectedImage);
-      }
-    } else {
-      setImage(null);
-    }
-  };
-
-  const handleAddCapacity = (capacity) => {
-    if (capacity && !capacities.includes(capacity)) {
-      setCapacities([...capacities, capacity]);
-    }
-  };
-
-  const handleRemoveCapacity = (capacity) => {
-    setCapacities(capacities.filter((c) => c !== capacity));
-  };
-
-  const handleColorChange = (e) => {
-    setCurrentColor(e.target.value);
-  };
-
-  const handleAddColor = (e) => {
-    if (e.key === "Enter" && currentColor.trim() !== "") {
-      e.preventDefault(); // Prevent form submission on Enter key
-      const colorToAdd = currentColor.trim().toLowerCase();
-      if (!colors.includes(colorToAdd)) {
-        setColors([...colors, colorToAdd]);
-        setCurrentColor(""); // Clear current color input
-      }
-    }
-  };
-
-  const handleRemoveColor = (color) => {
-    setColors(colors.filter((c) => c !== color));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
-
-    if (description.length < 1) {
-      return toast.info("Deskripsi produk tidak boleh kosong");
-    }
-
-    const formData = new FormData();
-    formData.append("category", category);
-    formData.append("capacities", JSON.stringify(capacities)); // Serialize array to JSON string
-    formData.append("colors", JSON.stringify(colors)); // Serialize array to JSON string
-    formData.append("description", description);
-    formData.append("name", productName);
-    formData.append("price", price.replace(/[^\d]/g, ""));
-    if (image) formData.append("image", image);
-
-    try {
-      const response = await createProduct(formData);
-      toast.success("Produk berhasil ditambahkan");
-      console.log("Product created:", response);
-    } catch (error) {
-      if (error.response.data.status === "error") {
-        toast.info("Nama Produk Sudah digunakan");
-      }
-      console.error("Error creating product:", error);
-    }
-  };
-
-  const handlePriceChange = (e) => {
-    const rawValue = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
-    const formattedValue = new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(rawValue);
-    setPrice(formattedValue);
-  };
+  const {
+    capacities,
+    category,
+    colors,
+    description,
+    setDescription,
+    handleAddCapacity,
+    handleCategoryChange,
+    handleColorChange,
+    handleImageChange,
+    handlePriceChange,
+    handleRemoveCapacity,
+    handleRemoveColor,
+    handleSubmit,
+    productName,
+    price,
+    selectedColor,
+  } = useCreateProduct();
 
   return (
     <div className="p-4">
       <form onSubmit={handleSubmit}>
-        {/* Pilihan Kategori */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Kategori</label>
           <select
@@ -123,33 +44,35 @@ const ModalProduct = () => {
           </select>
         </div>
 
+        {/* Nama Produk */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Nama Product</label>
+          <label className="block text-sm font-medium mb-2">Nama Produk</label>
           <input
             type="text"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
-            placeholder="Masukkan nama product"
+            placeholder="Masukkan nama produk"
             required
             className="w-full bg-gray-100 border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
         </div>
 
+        {/* Harga */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Harga</label>
           <input
             type="text"
             value={price}
             onChange={handlePriceChange}
-            placeholder="Masukkan harga product"
+            placeholder="Masukkan harga produk"
             required
             className="w-full bg-gray-100 border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
         </div>
+
         {category === "iphone" && (
           <>
             {/* Kapasitas */}
-
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">
                 Kapasitas
@@ -188,39 +111,45 @@ const ModalProduct = () => {
             {/* Warna */}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Warna</label>
-              <input
-                type="text"
-                value={currentColor}
-                maxLength={20}
+              <select
+                value={selectedColor}
                 onChange={handleColorChange}
-                onKeyDown={handleAddColor}
-                placeholder="Masukkan warna dan tekan Enter"
                 className="w-full bg-gray-100 border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              />
+              >
+                <option value="">Pilih Warna</option>
+                {DataColor.map((color) => (
+                  <option key={color.hex} value={color.name}>
+                    {color.name}
+                  </option>
+                ))}
+              </select>
               {colors.length > 0 && (
                 <ul className="mt-2 list-disc pl-5">
-                  {colors.map((col, index) => (
-                    <li
-                      key={index}
-                      className="flex justify-between items-center"
-                    >
-                      {col.charAt(0).toUpperCase() + col.slice(1)}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveColor(col)}
-                        className="ml-2 text-red-500"
+                  {colors.map((colorHex, index) => {
+                    const colorName = DataColor.find(
+                      (color) => color.hex === colorHex
+                    )?.name;
+                    return (
+                      <li
+                        key={index}
+                        className="flex justify-between items-center"
                       >
-                        &times;
-                      </button>
-                    </li>
-                  ))}
+                        {colorName || colorHex}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveColor(colorHex)}
+                          className="ml-2 text-red-500"
+                        >
+                          &times;
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
           </>
         )}
-
-        {/* Nama Produk */}
 
         {/* Deskripsi */}
         <div className="mb-4">
@@ -228,34 +157,27 @@ const ModalProduct = () => {
           <ReactQuill
             value={description}
             onChange={setDescription}
-            className="w-full h-auto overflow-auto bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-            theme="snow"
+            className="w-full h-auto overflow-auto bg-gray-100 border border-gray-300 rounded-lg"
           />
         </div>
 
-        {/* Gambar Produk */}
+        {/* Gambar */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">
-            Gambar Product
-          </label>
+          <label className="block text-sm font-medium mb-2">Gambar</label>
           <input
             type="file"
             accept="image/*"
-            required
             onChange={handleImageChange}
             className="w-full bg-gray-100 border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
         </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            className="bg-black w-full text-white px-4 py-2 rounded hover:bg-gray-900 focus:outline-none"
-          >
-            Simpan
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="bg-black w-full text-white px-4 py-2 rounded-lg hover:bg-gray-900"
+        >
+          Tambah Produk
+        </button>
       </form>
       <ToastContainer />
     </div>

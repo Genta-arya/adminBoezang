@@ -1,6 +1,7 @@
 import React from "react";
 import { FaBox, FaFileAlt, FaSignOutAlt } from "react-icons/fa";
 import useMenuStore from "../Zustand/useMenuStore";
+import { FaTextSlash } from "react-icons/fa6";
 
 const Sidebar = () => {
   const { activeMenu, setActiveMenu } = useMenuStore();
@@ -35,6 +36,17 @@ const Sidebar = () => {
               }`}
             >
               <FaFileAlt className="mr-2" /> Event & Promo
+            </a>
+          </li>
+
+          <li className="mb-4">
+            <a
+              onClick={() => setActiveMenu("quotest")}
+              className={`flex items-center p-2 cursor-pointer rounded ${
+                activeMenu === "quotest" ? "bg-gray-700" : "hover:bg-gray-700"
+              }`}
+            >
+              <FaTextSlash className="mr-2" /> Quotes
             </a>
           </li>
 
