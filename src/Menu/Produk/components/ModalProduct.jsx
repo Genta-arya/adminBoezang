@@ -4,8 +4,8 @@ import "react-quill/dist/quill.snow.css"; // Import React Quill styles
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { DataColor } from "../../../TypeColor";
 import useCreateProduct from "../../../Hooks/Products/useCreateProduct";
+import { DataColor } from "../../../TypeColor";
 
 const ModalProduct = () => {
   const {
@@ -13,6 +13,7 @@ const ModalProduct = () => {
     category,
     colors,
     description,
+    setProductName,
     setDescription,
     handleAddCapacity,
     handleCategoryChange,
@@ -26,6 +27,8 @@ const ModalProduct = () => {
     price,
     selectedColor,
   } = useCreateProduct();
+
+
 
   return (
     <div className="p-4">

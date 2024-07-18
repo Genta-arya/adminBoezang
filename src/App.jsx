@@ -20,7 +20,7 @@ const App = () => {
             <div className="relative flex-shrink-0">
               <Sidebar />
             </div>
-            <div className="flex-1 ml-52">
+            <div className="flex-1 lg:ml-52 md:ml-[204px]">
               <Navbar />
               <ContentAdmin />
             </div>

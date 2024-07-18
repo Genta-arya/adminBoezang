@@ -1,23 +1,43 @@
-import React, { useState } from "react";
-import { createProduct } from "../../services/Products/Products";
-import { toast } from "react-toastify";
-import { DataColor } from "../../TypeColor";
+import React, { useEffect, useState } from "react";
+import { updateProduct } from "../../services/Products/Products";
 
-const useCreateProduct = () => {
-  const [category, setCategory] = useState("");
-  const [capacities, setCapacities] = useState([]); // Array for capacities
-  const [colors, setColors] = useState([]); // Array for colors (hex values)
-  const [selectedColor, setSelectedColor] = useState(""); // State for selected color
-  const [description, setDescription] = useState("");
+const useEditProducts = ({ product, onClose, refresh }) => {
+  const [category, setCategory] = useState(product.category || "");
+  const [capacities, setCapacities] = useState([]);
+  const [colors, setColors] = useState([product.colors]);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [description, setDescription] = useState(product.description || "");
   const [image, setImage] = useState(null);
-  const [productName, setProductName] = useState("");
-  const [price, setPrice] = useState("");
+  const [productName, setProductName] = useState(product.name || "");
+  const [price, setPrice] = useState(product.price || "");
+
+  const capictyValue = product.capacities.map((data) => data.value);
+
+  useEffect(() => {
+    setCategory(product.category || "");
+
+    setCapacities(capictyValue || []);
+
+    const colorValues = product.colors.map((color) => color.value);
+    setColors(colorValues);
+    setDescription(product.description || "");
+    setProductName(product.name || "");
+    setPrice(
+      product.price
+        ? new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            minimumFractionDigits: 0,
+          }).format(product.price)
+        : ""
+    );
+  }, [product]);
 
   const handleCategoryChange = (event) => {
     setCategory(event.target.value);
     if (event.target.value !== "iphone") {
-      setCapacities([]); 
-      setColors([]); 
+      setCapacities([]);
+      setColors([]);
     }
   };
 
@@ -25,9 +45,8 @@ const useCreateProduct = () => {
     if (event.target.files.length > 0) {
       const selectedImage = event.target.files[0];
       if (selectedImage.size > 10 * 1024 * 1024) {
-        // 10MB in bytes
         toast.error("Ukuran gambar tidak boleh lebih dari 10MB");
-        setImage(null); // Clear the image if it exceeds the limit
+        setImage(null);
       } else {
         setImage(selectedImage);
       }
@@ -54,20 +73,20 @@ const useCreateProduct = () => {
       const colorHex = DataColor.find((color) => color.name === selected)?.hex;
       if (colorHex && !colors.includes(colorHex)) {
         setColors([...colors, colorHex]);
-        setSelectedColor(""); // Clear selected color
+        setSelectedColor("");
       }
     }
   };
 
-  const handleRemoveColor = (color) => {
-    setColors(colors.filter((c) => c !== color));
+  const handleRemoveColor = (colorHex) => {
+    setColors(colors.filter((c) => c !== colorHex));
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
+    event.preventDefault();
 
-    if (description.length < 1) {
-      return toast.info("Deskripsi produk tidak boleh kosong");
+    if (description.length < 1 || colors.length < 1 || capacities.length < 1) {
+      return toast.info("Data Produk tidak boleh  ada yang kosong");
     }
 
     const formData = new FormData();
@@ -80,13 +99,18 @@ const useCreateProduct = () => {
     if (image) formData.append("image", image);
 
     try {
-      const response = await createProduct(formData);
-      toast.success("Produk berhasil ditambahkan");
+      await updateProduct(product.id, formData);
+      toast.success("Produk berhasil diperbarui", {
+        onClose: () => {
+          onClose(false);
+          refresh();
+        },
+      });
     } catch (error) {
       if (error.response.data.status === "error") {
         toast.info("Nama Produk Sudah digunakan");
       }
-      console.error("Error creating product:", error);
+      console.error("Error updating product:", error);
     }
   };
 
@@ -97,19 +121,18 @@ const useCreateProduct = () => {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(rawValue);
-    setPrice(formattedValue);
+    setPrice(formattedValue); // Simpan harga dalam format string yang benar
   };
+
   return {
     capacities,
+    capictyValue,
     category,
-    price,
     colors,
-    selectedColor,
     description,
-    image,
+    selectedColor,
     productName,
-    setColors,
-    setProductName,
+    price,
     setDescription,
     handleAddCapacity,
     handleCategoryChange,
@@ -122,4 +145,4 @@ const useCreateProduct = () => {
   };
 };
 
-export default useCreateProduct;
+export default useEditProducts;

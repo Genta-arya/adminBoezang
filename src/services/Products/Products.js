@@ -35,6 +35,16 @@ export const updateProduct = async (id,data) => {
 };
 
 
+export const DeleteSingleProduct = async (id) => {
+  try {
+    const response = await axiosConfig.delete(`/product/data/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    throw error;
+  }
+}
+
 
 
 
