@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: 'CustomFont';
+    src: url('../public/fonts/8vIQ7wUr0m80wwYf0QCXZzYzUoTg8z6hR4jNCH5Z.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  body {
+    padding: 0;
+    margin: 0;
+
+    font-family: 'CustomFont , sans-serif';
+  }

@@ -7,7 +7,7 @@ import { Logout } from "../services/Auth/AuthApi";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import useLoadingStores from "../Zustand/useLoadingStore";
-
+import icon from "../assets/icon.png"
 const Sidebar = () => {
   const { activeMenu, setActiveMenu } = useMenuStore();
   const { token, logout } = useAuthStore();
@@ -37,7 +37,7 @@ const Sidebar = () => {
       <nav>
         <div className="flex justify-center">
           <img
-            src="https://boezang-apple-development.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ficon.e16eee5c.png&w=256&q=75"
+            src={icon}
             alt=""
             className="bg-white rounded-full p-1 w-20 mb-8"
           />
