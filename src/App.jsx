@@ -5,8 +5,13 @@ import ContentAdmin from "./components/ContentAdmin";
 
 import LoadingLottie from "./components/Loading";
 import useLoadingStores from "./Zustand/useLoadingStore";
+import useCheckLogin from "./Hooks/Auth/UseCheckLogin";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
+  const {} = useCheckLogin()
+
   return (
     <>
       <div className="md:hidden lg:hidden h-screen flex items-center justify-center bg-gray-100">
@@ -27,6 +32,7 @@ const App = () => {
           </div>
         </div>
       </main>
+      <ToastContainer autoClose={1200} />
     </>
   );
 };

@@ -2,6 +2,8 @@
 import React from "react";
 import useMenuStore from "../Zustand/useMenuStore";
 import MainProduk from "../Menu/Produk/MainProduk";
+import QuotestPage from "../Menu/Quotest/QuotestPage";
+import MainArtikel from "../Menu/Artikel/MainArtikel";
 
 const ContentAdmin = () => {
   const { activeMenu } = useMenuStore();
@@ -11,10 +13,10 @@ const ContentAdmin = () => {
       case "produk":
         return <MainProduk />;
       case "event":
-        return <div>Ini adalah konten untuk Event & Promo</div>;
+        return <MainArtikel />
 
       case "quotest":
-        return <div>Ini adalah konten quotes</div>;
+        return <QuotestPage />;
       case "signout":
         return (
           <div>

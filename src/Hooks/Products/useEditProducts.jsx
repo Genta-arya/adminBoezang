@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { updateProduct } from "../../services/Products/Products";
+import { Slide, toast } from "react-toastify";
+import useLoadingStores from "../../Zustand/useLoadingStore";
+import { message } from "antd";
+import { useNavigate } from "react-router-dom";
+import { DataColor } from "../../TypeColor";
 
 const useEditProducts = ({ product, onClose, refresh }) => {
   const [category, setCategory] = useState(product.category || "");
@@ -10,9 +15,9 @@ const useEditProducts = ({ product, onClose, refresh }) => {
   const [image, setImage] = useState(null);
   const [productName, setProductName] = useState(product.name || "");
   const [price, setPrice] = useState(product.price || "");
-
+  const { isLoading, setLoading } = useLoadingStores();
   const capictyValue = product.capacities.map((data) => data.value);
-
+  const navigate = useNavigate();
   useEffect(() => {
     setCategory(product.category || "");
 
@@ -85,9 +90,17 @@ const useEditProducts = ({ product, onClose, refresh }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (description.length < 1 || colors.length < 1 || capacities.length < 1) {
-      return toast.info("Data Produk tidak boleh  ada yang kosong");
+    if (category === "iphone") {
+      if (
+        description.length < 1 ||
+        colors.length < 1 ||
+        capacities.length < 1
+      ) {
+        return toast.info("Data Produk tidak boleh  ada yang kosong");
+      }
     }
+
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("category", category);
@@ -100,17 +113,36 @@ const useEditProducts = ({ product, onClose, refresh }) => {
 
     try {
       await updateProduct(product.id, formData);
-      toast.success("Produk berhasil diperbarui", {
-        onClose: () => {
-          onClose(false);
-          refresh();
-        },
-      });
+
+      refresh();
+      message.success("Produk Berhasil di Edit");
+      onClose(false);
     } catch (error) {
+      message.error("Terjadi Masalah Pada server");
+      localStorage.removeItem("_token");
+      navigate("/login");
+
       if (error.response.data.status === "error") {
-        toast.info("Nama Produk Sudah digunakan");
+        message.info("Nama Produk Sudah digunakan");
       }
-      console.error("Error updating product:", error);
+
+      setLoading(false);
+      if (error.response.status === 404) {
+        localStorage.removeItem("_token");
+        navigate("/login");
+      }
+
+      if (error.request) {
+        message.error(
+          "IP telah diblok sementara karena terlalu banyak melakukan request, silahkan coba beberapa saat lagi"
+        );
+      } else {
+        localStorage.removeItem("_token");
+        navigate("/login");
+        message.error(error.response?.data?.message || "An error occurred.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -133,11 +165,13 @@ const useEditProducts = ({ product, onClose, refresh }) => {
     selectedColor,
     productName,
     price,
+    isLoading,
     setDescription,
     handleAddCapacity,
     handleCategoryChange,
     handleColorChange,
     handleImageChange,
+    setProductName,
     handlePriceChange,
     handleRemoveCapacity,
     handleRemoveColor,

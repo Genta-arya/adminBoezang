@@ -1,28 +1,21 @@
 import React, { useState } from "react";
 import { FaCog, FaPlus, FaSearch, FaTags } from "react-icons/fa";
-import ModalContainer from "../../../components/ModalContainer";
-import ModalProduct from "./ModalProduct";
+
 import useSearchStore from "../../../Zustand/useSearchStore";
-import useGetProducts from "../../../Hooks/Products/useGetProducts";
+
 import ModalPromo from "./ModalPromo";
+import AddProduk from "../Modal/AddProduk";
 
-const HeaderProduct = () => {
-
-  const {products} = useGetProducts()
-
-
+const HeaderProduct = ({ products, fetchProducts }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenPromo, setIsModalOpenPromo] = useState(false);
-  const [isModalOpenTerlaris, setIsModalOpenTerlaris] = useState(false);
+
   const { searchTerm, setSearchTerm } = useSearchStore();
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   const openModalPromo = () => setIsModalOpenPromo(true);
   const closeModalPromo = () => setIsModalOpenPromo(false);
-
-  const openModalTerlaris = () => setIsModalOpenTerlaris(true);
-  const closeModalTerlaris = () => setIsModalOpenTerlaris(false);
 
   return (
     <div className="container mx-auto lg:px-4 pt-8">
@@ -42,13 +35,6 @@ const HeaderProduct = () => {
             <FaTags className="mr-2" />
             Tambah Promo
           </button>
-          <button
-            onClick={openModalTerlaris}
-            className="bg-black  hover:scale-95 ease-in transition-all text-white flex items-center px-4 py-2 rounded hover:bg-gray-900 focus:outline-none"
-          >
-            <FaCog className="mr-2" />
-            Setting Terlaris
-          </button>
         </div>
 
         <div className="relative md:w-full lg:w-72">
@@ -57,25 +43,20 @@ const HeaderProduct = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Cari produk..."
-            className="bg-black border md:w-full border-gray-700 rounded-lg py-2 px-4 pl-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="bg-black border md:w-full border-gray-700 rounded-lg py-2 px-4 pl-10 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white" />
         </div>
       </div>
-
-      <ModalContainer
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        title={"Tambah Produk"}
-      >
-        <ModalProduct />
-      </ModalContainer>
+      {isModalOpen && (
+        <AddProduk onClose={closeModal} refresh={fetchProducts} />
+      )}
 
       <ModalPromo
         products={products}
         isOpen={isModalOpenPromo}
         onClose={closeModalPromo}
-        onSave={() => {}}
+        refresh={fetchProducts}
       />
     </div>
   );

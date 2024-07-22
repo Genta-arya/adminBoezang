@@ -65,3 +65,14 @@ export const getProduct = async (kategori = null) => {
     throw error;
   }
 };
+
+
+export const getSingleProduct = async (id) => {
+  try {
+    const response = await axiosConfig.get(`/product/data/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    throw error;
+  }
+}

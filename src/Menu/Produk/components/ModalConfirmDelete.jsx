@@ -2,24 +2,30 @@ import React from "react";
 import icon from "../../../assets/alert.png";
 import { DeleteSingleProduct } from "../../../services/Products/Products";
 import { toast, ToastContainer } from "react-toastify";
+import useLoadingStores from "../../../Zustand/useLoadingStore";
+import useProductStore from "../../../Zustand/useProductStore";
+import { message } from "antd";
 
-const ModalConfirmDelete = ({ id, onClose, refresh }) => {
+const ModalConfirmDelete = ({ id, onClose, refresh, isOpen }) => {
+  const { setLoading, isLoading } = useLoadingStores();
+
+  console.log(isOpen);
 
   const handleSubmit = async () => {
-    console.log("click")
+    console.log("click");
+    setLoading(true);
     try {
+      await DeleteSingleProduct(id);
 
-      const response = await DeleteSingleProduct(id);
-    
-        toast.success("Produk Berhasil di Hapus", {
-          onClose: () => {
-            onClose(false);
-            refresh();
-          },
-        });
+      refresh();
+      onClose(false);
+      message.success("Produk telah dihapus")
       
     } catch (error) {
       console.log(error);
+      toast.error("Gagal Menghapus data");
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -35,12 +41,13 @@ const ModalConfirmDelete = ({ id, onClose, refresh }) => {
       <div className="flex flex-col gap-2 font-bold mt-12">
         <button
           onClick={handleSubmit}
-          className="bg-black text-white py-2 px-4"
+          disabled={isLoading}
+          className="bg-black rounded-lg hover:bg-gray-900 transition-colors disabled:bg-gray-500 text-white py-2 px-4"
         >
           Lanjutkan
         </button>
       </div>
-      <ToastContainer />
+
     </div>
   );
 };

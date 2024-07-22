@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import { createProduct } from "../../services/Products/Products";
 import { toast } from "react-toastify";
 import { DataColor } from "../../TypeColor";
+import useGetProducts from "./useGetProducts";
+import useLoadingStores from "../../Zustand/useLoadingStore";
+import { message } from "antd";
+import { useNavigate } from "react-router-dom";
 
-const useCreateProduct = () => {
+const useCreateProduct = ({ onClose, refresh }) => {
   const [category, setCategory] = useState("");
   const [capacities, setCapacities] = useState([]); // Array for capacities
   const [colors, setColors] = useState([]); // Array for colors (hex values)
@@ -12,12 +16,14 @@ const useCreateProduct = () => {
   const [image, setImage] = useState(null);
   const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
+  const { isLoading, setLoading } = useLoadingStores();
+  const navigate = useNavigate();
 
   const handleCategoryChange = (event) => {
     setCategory(event.target.value);
     if (event.target.value !== "iphone") {
-      setCapacities([]); 
-      setColors([]); 
+      setCapacities([]);
+      setColors([]);
     }
   };
 
@@ -70,6 +76,8 @@ const useCreateProduct = () => {
       return toast.info("Deskripsi produk tidak boleh kosong");
     }
 
+    setLoading(true);
+
     const formData = new FormData();
     formData.append("category", category);
     formData.append("capacities", JSON.stringify(capacities));
@@ -81,12 +89,30 @@ const useCreateProduct = () => {
 
     try {
       const response = await createProduct(formData);
-      toast.success("Produk berhasil ditambahkan");
+
+      refresh();
+      onClose(false);
+      message.success("Produk berhasil ditambahkan");
     } catch (error) {
-      if (error.response.data.status === "error") {
-        toast.info("Nama Produk Sudah digunakan");
+      message.error("Terjadi Masalah Pada server");
+      localStorage.removeItem("_token");
+      navigate("/login");
+
+      if (error.request) {
+        message.error(
+          "IP telah diblok sementara karena terlalu banyak melakukan request, silahkan coba beberapa saat lagi"
+        );
+        localStorage.removeItem("_token");
+        navigate("/login");
+      } else {
+        localStorage.removeItem("_token");
+        navigate("/login");
+        message.error(error.response?.data?.message || "An error occurred.");
       }
+
       console.error("Error creating product:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -109,6 +135,7 @@ const useCreateProduct = () => {
     image,
     productName,
     setColors,
+    isLoading,
     setProductName,
     setDescription,
     handleAddCapacity,

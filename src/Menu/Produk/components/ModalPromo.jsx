@@ -1,49 +1,102 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { CreatePromo } from "../../../services/Products/Promo";
 import { toast, ToastContainer } from "react-toastify";
+import { message } from "antd";
+import { PulseLoader } from "react-spinners";
+import { getSingleProduct } from "../../../services/Products/Products";
 
-const ModalPromo = ({ products, isOpen, onClose }) => {
-  const [selectedProducts, setSelectedProducts] = useState([]);
+// Component to create promo for a product
+const ModalPromo = ({ products, isOpen, onClose, refresh }) => {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [variants, setVariants] = useState([]);
   const [discount, setDiscount] = useState("");
-  const [expiresAt, setExpiresAt] = useState(null); // State for expiration date
 
-  const handleProductChange = (selectedOptions) => {
-    setSelectedProducts(selectedOptions);
+  const [expiryDate, setExpiryDate] = useState(new Date());
+  const [loading, setLoading] = useState(false);
+
+  const onCloseModal = () => {
+    setSelectedProduct(null);
+    setSelectedVariant(null);
+    setDiscount("");
+    setStatus(true);
+    setExpiryDate(new Date());
+    onClose();
   };
 
-  const handleDiscountChange = (event) => {
-    setDiscount(event.target.value);
-  };
+  // Fetch variants when a product is selected
+  useEffect(() => {
+    const fetchVariants = async () => {
+      if (selectedProduct) {
+        try {
+          const response = await getSingleProduct(selectedProduct.value);
+          const product = response.data;
+          setVariants(
+            product.variants.map((variant, index) => ({
+              value: variant.externalId,
+              label: `${variant.kapasitas}GB -  Variant ${index + 1}`,
+            }))
+          );
+        } catch (error) {
+          console.error("Failed to fetch variants:", error);
+        }
+      } else {
+        setVariants([]);
+        setSelectedVariant(null);
+      }
+    };
 
-  const handleSave = async () => {
+    fetchVariants();
+  }, [selectedProduct]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedProduct || !selectedVariant || !discount || !expiryDate) {
+      message.info("Please fill out all fields.");
+      return;
+    }
+
+    const discountValue = parseInt(discount);
+    if (discountValue < 1 || discountValue > 100) {
+      message.info("Maksimal Diskon 100%");
+      return;
+    }
+
+    const now = new Date();
+    if (expiryDate <= now) {
+      message.info("Diskon harus berlaku setelah tanggal sekarang");
+      return;
+    }
+
     try {
-      const productIds = selectedProducts.map((product) => product.value);
-      const promoData = {
-        discount: parseFloat(discount), // Convert discount to float if needed
-        productIds,
-        expiresAt: expiresAt.toISOString(), // Convert date to ISO string format
-      };
+      setLoading(true);
+      await CreatePromo({
+        variantId: selectedVariant.value,
+        discount: discountValue,
+        expiryDate: expiryDate.toISOString(),
+      });
 
-      // Call backend service to create promo
-      const response = await CreatePromo(promoData);
-      console.log("Promo created:", response);
-
-      // Optionally, close the modal or handle success feedback
+      toast.success("Promo created successfully!");
+      refresh();
       onClose();
     } catch (error) {
       if (error.response.status === 400) {
-        toast.info(error.response.data.message);
+        return message.info(error.response.data.message);
       }
-      console.error("Error creating promo:", error);
-      // Handle error, display message, etc.
+
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!isOpen) return null;
 
+  // Convert products data to options for the Select component
   const productOptions = products.map((product) => ({
     value: product.id,
     label: product.name,
@@ -51,56 +104,89 @@ const ModalPromo = ({ products, isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="fixed inset-0 bg-black opacity-50"></div>
-      <form
-        onSubmit={handleSave}
-        className="bg-white rounded-lg shadow-lg p-6 z-50 w-full max-w-md mx-auto"
-      >
-        <h2 className="text-2xl font-bold mb-4">Tambah Promo</h2>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Pilih Produk</label>
-          <Select
-            isMulti
-            options={productOptions}
-            required
-            className="w-full"
-            onChange={handleProductChange}
-          />
+      <div
+        className="fixed inset-0 bg-black opacity-50"
+        onClick={onClose}
+      ></div>
+      <div className="lg:w-[50%] md:w-[70%] mx-auto p-6 bg-white shadow-lg rounded-lg z-50 relative">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold">Create Promo</h1>
+          <button
+            onClick={() => onCloseModal()}
+            className="text-gray-600 hover:text-gray-800 absolute top-2 right-2"
+          >
+            &times;
+          </button>
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Diskon (%)</label>
-          <input
-            type="number"
-            required
-            className="w-full px-3 py-2 border border-gray-500 rounded-lg"
-            value={discount}
-            onChange={handleDiscountChange}
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Tanggal Berakhir</label>
-          <div className="w-full flex justify-center">
-            <DatePicker
-              selected={expiresAt}
-              onChange={(date) => setExpiresAt(date)}
-              className="w-full px-3 py-2 border border-gray-500 rounded-lg"
-              dateFormat="dd/MM/yyyy"
+
+        <form onSubmit={handleSubmit}>
+          <div className="flex flex-col mb-4">
+            <label className="font-medium mb-1">Product:</label>
+            <Select
+              options={productOptions}
+              value={selectedProduct}
+              onChange={setSelectedProduct}
+              placeholder="Select a product"
             />
           </div>
-        </div>
-        <div className="flex justify-end flex-col-reverse gap-2">
-          <button
-            onClick={onClose}
-            className="bg-gray-500 text-white px-4 py-2 rounded-lg "
-          >
-            Batal
-          </button>
-          <button className="bg-black text-white px-4 py-2 rounded-lg">
-            Simpan
-          </button>
-        </div>
-      </form>
-      <ToastContainer />
+
+          {selectedProduct && (
+            <>
+              <div className="flex flex-col mb-4">
+                <label className="font-medium mb-1">Variant:</label>
+                <Select
+                  options={variants}
+                  required
+                  value={selectedVariant}
+                  onChange={setSelectedVariant}
+                  placeholder="Pilih Variant"
+                />
+              </div>
+
+              <div className="flex flex-col mb-4">
+                <label className="font-medium mb-1">Discount:</label>
+                <input
+                  type="number"
+                  required
+                  min={1}
+                  max={100}
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                  placeholder="Besar Discount"
+                  className="border border-gray-300 rounded-md p-2"
+                />
+              </div>
+
+              <div className="flex flex-col mb-4">
+                <label className="font-medium mb-1">Berakhir:</label>
+                <DatePicker
+                  selected={expiryDate}
+                  onChange={(date) => setExpiryDate(date)}
+                  className="border border-gray-300 rounded-md p-2 w-full"
+                />
+              </div>
+            </>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onCloseModal}
+              className="border w-full text-black border-black py-2 px-4 rounded-md"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-black w-full text-white py-2 px-4 rounded-md hover:bg-gray-900"
+              disabled={loading}
+            >
+              {loading ? <PulseLoader size={8} color="#ffffff" /> : "Submit"}
+            </button>
+          </div>
+        </form>
+        <ToastContainer />
+      </div>
     </div>
   );
 };

@@ -2,9 +2,35 @@ import React from "react";
 import { FaBox, FaFileAlt, FaSignOutAlt } from "react-icons/fa";
 import useMenuStore from "../Zustand/useMenuStore";
 import { FaTextSlash } from "react-icons/fa6";
+import useAuthStore from "../Zustand/useAuthStore";
+import { Logout } from "../services/Auth/AuthApi";
+import { useNavigate } from "react-router-dom";
+import { message } from "antd";
+import useLoadingStores from "../Zustand/useLoadingStore";
 
 const Sidebar = () => {
   const { activeMenu, setActiveMenu } = useMenuStore();
+  const { token, logout } = useAuthStore();
+  const { isLoading, setLoading } = useLoadingStores();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      await Logout(token);
+      logout();
+      navigate("/login");
+      localStorage.removeItem("_token");
+    } catch (error) {
+      if (error.response.status === 500) {
+        message.error("Terjadi masalah pada server");
+        localStorage.removeItem("_token");
+        navigate("/login");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <aside className="bg-black text-white w-52 min-h-screen p-4 fixed top-0 left-0 border-r-2 border-white  ">
@@ -52,7 +78,7 @@ const Sidebar = () => {
 
           <li className="mb-4">
             <a
-              onClick={() => setActiveMenu("signout")}
+              onClick={() => handleLogout()}
               className={`flex items-center p-2 cursor-pointer rounded ${
                 activeMenu === "signout" ? "bg-gray-700" : "hover:bg-gray-700"
               }`}
