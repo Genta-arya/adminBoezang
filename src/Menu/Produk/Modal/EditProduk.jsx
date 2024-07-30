@@ -23,17 +23,15 @@ const EditProduk = ({ onClose, refresh, productId }) => {
   const [category, setCategory] = useState("");
   const [image, setImage] = useState(null);
   const [variants, setVariants] = useState([
-    { name: "produk", kapasitas: "", price: "", colorVariants: [""] },
+    { name: "produk", kapasitas: "", price: "", colorVariants: [""], quality: "" }, // Added quality
   ]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Fetch product details based on productId
     const fetchProduct = async () => {
       try {
         setLoading(true);
         const response = await getSingleProduct(productId);
-
         const productData = response.data;
 
         setProduct(productData);
@@ -48,11 +46,11 @@ const EditProduk = ({ onClose, refresh, productId }) => {
             kapasitas: variant.kapasitas,
             price: variant.price,
             colorVariants: variant.colorVariants.map((color) => color.value),
+            quality: variant.quality 
           }))
         );
       } catch (error) {
         console.error("Failed to fetch product:", error);
-
         onClose(false);
       } finally {
         setLoading(false);
@@ -62,69 +60,36 @@ const EditProduk = ({ onClose, refresh, productId }) => {
     fetchProduct();
   }, [productId]);
 
-  console.log(description);
-
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...variants];
     newVariants[index][field] = value;
     setVariants(newVariants);
   };
 
-  const handleColorChange = (variantIndex, colorIndex, value) => {
-    const newVariants = [...variants];
-    newVariants[variantIndex].colorVariants[colorIndex] = value;
-    setVariants(newVariants);
-  };
-
-  const addColorVariant = (variantIndex) => {
-    const newVariants = [...variants];
-    newVariants[variantIndex].colorVariants.push("");
-    setVariants(newVariants);
-  };
-
-  const removeColorVariant = (variantIndex, colorIndex) => {
-    const newVariants = [...variants];
-    newVariants[variantIndex].colorVariants.splice(colorIndex, 1);
-    setVariants(newVariants);
-  };
-
   const addVariant = () => {
     setVariants([
       ...variants,
-      { name: "produk", kapasitas: "", price: "", colorVariants: [""] },
+      { name: "produk", kapasitas: "", price: "", colorVariants: [""], quality: "" }, // Added quality
     ]);
-  };
-
-  const removeVariant = (index) => {
-    const newVariants = [...variants];
-    newVariants.splice(index, 1);
-    setVariants(newVariants);
-  };
-
-  const getAvailableColors = (selectedColors) => {
-    return DataColor.filter((color) => !selectedColors.includes(color.hex));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     for (const variant of variants) {
-      // Check if any required field is empty
-      if (!variant.price || !variant.colorVariants.every((color) => color)) {
+    
+      if (!variant.price || !variant.colorVariants.every((color) => color) ) { // Added quality check
         return message.info(
           "Periksa kembali form variant tidak boleh ada yang kosong"
         );
       }
 
-      // Specific check for category "iphone"
       if (category === "iphone" && !variant.kapasitas) {
         return alert("Please select kapasitas for each iPhone variant.");
       }
     }
 
-    // Prepare the externalIds separately
     const externalIds = product.variants.map((variant) => variant.externalId);
-
     const formData = new FormData();
 
     formData.append("name", name);
@@ -135,11 +100,8 @@ const EditProduk = ({ onClose, refresh, productId }) => {
     if (image) formData.append("image", image);
     formData.append("variants", JSON.stringify(variants));
 
-    // Append externalIds separately
+ 
     formData.append("externalIds", externalIds);
-
-    console.log("Variants:", variants); // For debugging
-    console.log("External IDs:", externalIds); // For debugging
 
     try {
       await updateProduct(productId, formData);
@@ -381,6 +343,25 @@ const EditProduk = ({ onClose, refresh, productId }) => {
                     </select>
                   </div>
                 )}
+
+                <div className="flex flex-col mb-4">
+                  <label className="font-medium mb-1">Kualitas:</label>
+                  <select
+                    value={variant.quality}
+                    onChange={(e) =>
+                      handleVariantChange(
+                        index,
+                        "quality",
+                        e.target.value === "true"
+                      )
+                    }
+                    required
+                    className="border border-gray-300 rounded-md p-2"
+                  >
+                    <option value="true">Baru</option>
+                    <option value="false">Second</option>
+                  </select>
+                </div>
 
                 <div className="flex flex-col mb-4">
                   <label className="font-medium mb-1">Harga:</label>

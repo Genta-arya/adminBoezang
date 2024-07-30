@@ -19,7 +19,13 @@ const AddProduk = ({ onClose, refresh }) => {
   const [description, setDescription] = useState("");
   const [spesifikasi, setSpesification] = useState("");
   const [variants, setVariants] = useState([
-    { name: "produk", kapasitas: "", price: "", colorVariants: [""] },
+    {
+      name: "produk",
+      kapasitas: "",
+      price: "",
+      colorVariants: [""],
+      quality: true, // Default to "Baru"
+    },
   ]);
 
   const handleVariantChange = (index, field, value) => {
@@ -49,7 +55,7 @@ const AddProduk = ({ onClose, refresh }) => {
   const addVariant = () => {
     setVariants([
       ...variants,
-      { name: "produk", kapasitas: "", price: "", colorVariants: [""] },
+      { name: "produk", kapasitas: "", price: "", colorVariants: [""], quality: true },
     ]);
   };
 
@@ -331,6 +337,24 @@ const AddProduk = ({ onClose, refresh }) => {
                     </select>
                   </div>
                 )}
+                <div className="flex flex-col mb-4">
+                  <label className="font-medium mb-1">Kualitas:</label>
+                  <select
+                    value={variant.quality}
+                    onChange={(e) =>
+                      handleVariantChange(
+                        index,
+                        "quality",
+                        e.target.value === "true"
+                      )
+                    }
+                    required
+                    className="border border-gray-300 rounded-md p-2"
+                  >
+                    <option value="true">Baru</option>
+                    <option value="false">Second</option>
+                  </select>
+                </div>
 
                 <div className="flex flex-col mb-4">
                   <label className="font-medium mb-1">Harga:</label>

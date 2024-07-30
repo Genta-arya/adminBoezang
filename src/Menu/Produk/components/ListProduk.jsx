@@ -127,6 +127,7 @@ const ListProduk = () => {
                     <p className="text-gray-700 mb-4">
                       Type: {product.category}
                     </p>
+
                     <div className="space-y-2">
                       {product.variants.map((variant, index) => {
                         const originalPrice = variant.price;
@@ -148,7 +149,12 @@ const ListProduk = () => {
                             key={variant.id}
                             className="border-t border-gray-300 pt-2"
                           >
-                            <strong>Variant {index + 1}</strong>
+                            <div className="flex justify-between items-center">
+                              <strong>Variant {index + 1}</strong>
+                              <p className={`text-white font-bold px-4 rounded-md ${variant.quality === true ? "bg-red-500" : "bg-green-500"}`}>
+                                {variant.quality === true ? "New" : "Second"}
+                              </p>
+                            </div>
                             {product.category === "iphone" && (
                               <p>{variant.kapasitas} GB</p>
                             )}

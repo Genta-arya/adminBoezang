@@ -131,36 +131,7 @@ const ModalAddArtikel = ({ isOpen, onClose, refresh }) => {
             </div>
             <div className="mb-4">
               <div className="bg-white text-black">
-                {/* <ReactQuill
-                  formats={[
-                    "header",
-                    "bold",
-                    "italic",
-                    "underline",
-                    "strike",
-                    "blockquote",
-
-                    "list",
-                    "bullet",
-                    "indent",
-
-                    "link",
-                  ]}
-                  modules={{
-                    toolbar: [
-                      [{ header: [1, 2, false] }],
-                      ["bold", "italic", "underline", "strike", "blockquote"],
-
-                      ["link"],
-                      ["clean"],
-                    ],
-                  }}
-                  theme="snow"
-                  placeholder="Masukkan Konten Artikel"
-                  
-                  value={content}
-                  onChange={handleContentChange}
-                /> */}
+             
                 <Editor
                   apiKey="gne0tu6k3iyh6uv3gc01ui2l980ve69xi0h7iwelw6sf2uvg"
                   value={content}
