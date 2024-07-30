@@ -1,5 +1,5 @@
 import React from "react";
-import { FaBox, FaFileAlt, FaSignOutAlt } from "react-icons/fa";
+import { FaBox, FaFileAlt, FaImage, FaSignOutAlt } from "react-icons/fa";
 import useMenuStore from "../Zustand/useMenuStore";
 import { FaTextSlash } from "react-icons/fa6";
 import useAuthStore from "../Zustand/useAuthStore";
@@ -51,6 +51,17 @@ const Sidebar = () => {
               }`}
             >
               <FaBox className="mr-2" /> Produk
+            </a>
+          </li>
+
+          <li className="mb-4">
+            <a
+              onClick={() => setActiveMenu("browsur")}
+              className={`flex items-center p-2 cursor-pointer rounded ${
+                activeMenu === "browsur" ? "bg-gray-700" : "hover:bg-gray-700"
+              }`}
+            >
+              <FaImage className="mr-2" /> Pop up Harga
             </a>
           </li>
 
