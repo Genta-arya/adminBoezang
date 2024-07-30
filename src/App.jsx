@@ -3,8 +3,7 @@ import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import ContentAdmin from "./components/ContentAdmin";
 
-import LoadingLottie from "./components/Loading";
-import useLoadingStores from "./Zustand/useLoadingStore";
+
 import useCheckLogin from "./Hooks/Auth/UseCheckLogin";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from "react-toastify";
