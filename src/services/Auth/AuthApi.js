@@ -31,3 +31,36 @@ export const Logout = async (token) => {
     throw error;
   }
 };
+
+export const createOtp = async (email) => {
+  try {
+    const response = await axiosConfig.post("/user/send-otp", 
+      email,
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const verifyOtp = async (email, otp) => {
+  try {
+    const response = await axiosConfig.post("/user/verify-otp", 
+      email, otp
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const changePassword = async (email, password) => {
+  try {
+    const response = await axiosConfig.post("/user/change-password", 
+      {email, password}
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
