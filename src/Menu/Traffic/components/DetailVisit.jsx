@@ -3,6 +3,8 @@ import axios from "axios";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { format, utcToZonedTime } from 'date-fns-tz';
+import { id } from 'date-fns/locale';
 
 // Mengimpor ikon marker
 import markerIconUrl from 'leaflet/dist/images/marker-icon.png';
@@ -66,9 +68,10 @@ const DetailVisit = ({ data }) => {
     fetchLocations();
   }, [data]);
 
-  // Mendapatkan tanggal hari ini
-  const today = new Date();
-  const todayString = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
+  // Mendapatkan tanggal hari ini sesuai dengan zona waktu Jakarta
+  const timeZone = 'Asia/Jakarta';
+  const today = utcToZonedTime(new Date(), timeZone);
+  const todayString = format(today, 'yyyy-MM-dd', { timeZone });
 
   // Menyaring data untuk hari ini saja
   const todayData = data.filter(day => day.date.startsWith(todayString));
