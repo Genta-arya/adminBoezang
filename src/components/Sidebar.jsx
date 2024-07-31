@@ -1,5 +1,5 @@
 import React from "react";
-import { FaBox, FaCog, FaFileAlt, FaImage, FaSignOutAlt } from "react-icons/fa";
+import { FaBox, FaChartBar, FaCog, FaFileAlt, FaImage, FaSignOutAlt } from "react-icons/fa";
 import useMenuStore from "../Zustand/useMenuStore";
 import { FaTextSlash } from "react-icons/fa6";
 import useAuthStore from "../Zustand/useAuthStore";
@@ -84,6 +84,16 @@ const Sidebar = () => {
               }`}
             >
               <FaTextSlash className="mr-2" /> Quotes
+            </a>
+          </li>
+          <li className="mb-4">
+            <a
+              onClick={() => setActiveMenu("trafic")}
+              className={`flex items-center p-2 cursor-pointer rounded ${
+                activeMenu === "trafic" ? "bg-gray-700" : "hover:bg-gray-700"
+              }`}
+            >
+              <FaChartBar className="mr-2" /> Trafic Pengunjung
             </a>
           </li>
 

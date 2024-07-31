@@ -7,6 +7,8 @@ import MainArtikel from "../Menu/Artikel/MainArtikel";
 import BrowsurPage from "../Menu/Browsur/BrowsurPage";
 import AkunPage from "../Menu/Akun/AkunPage";
 
+import MainTrafic from "../Menu/Traffic/MainTrafic";
+
 const ContentAdmin = () => {
   const { activeMenu } = useMenuStore();
 
@@ -19,6 +21,8 @@ const ContentAdmin = () => {
 
       case "quotest":
         return <QuotestPage />;
+        case "trafic":
+          return <MainTrafic />;
 
         case "akun":
           return <AkunPage />;
