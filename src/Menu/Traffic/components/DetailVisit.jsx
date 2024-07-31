@@ -36,7 +36,7 @@ const DetailVisit = ({ data }) => {
 
   const fetchIpLocation = async (ip) => {
     try {
-      const response = await axios.get(`https://ipapi.co/${ip}/json/`);
+      const response = await axios.get(`https://ipinfo.io/${ip}/json`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching location for IP ${ip}:`, error);
@@ -46,8 +46,15 @@ const DetailVisit = ({ data }) => {
 
   useEffect(() => {
     const fetchLocations = async () => {
+      const today = new Date();
+      today.setHours(today.getHours() + 7); // Menyesuaikan ke WIB
+      const todayString = today.toISOString().split("T")[0]; // Format YYYY-MM-DD
+
+      // Menyaring data untuk hari ini saja
+      const todayData = data.filter((day) => day.date.startsWith(todayString));
+
       const uniqueIps = new Set();
-      data.forEach((day) => {
+      todayData.forEach((day) => {
         day.visits.forEach((visit) => {
           uniqueIps.add(visit.ip);
         });
@@ -171,13 +178,19 @@ const DetailVisit = ({ data }) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         {/* Menampilkan marker untuk setiap lokasi IP unik */}
-        {Object.entries(ipLocations).map(([ip, location]) => (
-          <Marker key={ip} position={[location.latitude, location.longitude]}>
-            <Popup>
-              {location.city}, {location.region}, {location.country}
-            </Popup>
-          </Marker>
-        ))}
+        {Object.entries(ipLocations).map(([ip, location]) => {
+          if (location.loc) {
+            const [latitude, longitude] = location.loc.split(",").map(Number); // Parsing latitude and longitude
+            return (
+              <Marker key={ip} position={[latitude, longitude]}>
+                <Popup>
+                  {location.city}, {location.region}, {location.country}
+                </Popup>
+              </Marker>
+            );
+          }
+          return null; // If location does not have loc property, skip rendering
+        })}
       </MapContainer>
     </div>
   );
