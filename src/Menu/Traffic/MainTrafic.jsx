@@ -14,7 +14,7 @@ const MainTrafic = () => {
     );
 
     socket.on("update-visitors", (data) => {
-      console.log("Updated visitors data:", data);
+  
       setVisitorsData(data.data);
     });
 

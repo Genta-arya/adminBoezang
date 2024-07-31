@@ -93,7 +93,7 @@ const Sidebar = () => {
                 activeMenu === "trafic" ? "bg-gray-700" : "hover:bg-gray-700"
               }`}
             >
-              <FaChartBar className="mr-2" /> Trafic Pengunjung
+              <FaChartBar className="mr-2" /> Tracking View
             </a>
           </li>
 

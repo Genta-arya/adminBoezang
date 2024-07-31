@@ -75,7 +75,7 @@ const TrafficChart = ({ visitorsData }) => {
         ],
       });
 
-      console.log("Grouped visitors by IP:", groupedByIP); // Melihat hasil gruping
+  
     }
   }, [visitorsData]);
 
