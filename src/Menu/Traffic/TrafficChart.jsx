@@ -1,176 +1,189 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import moment from 'moment-timezone';
+import { io } from "socket.io-client";
+import { Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2"; // Import Bar dari Chart.js
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { format } from "date-fns";
 
-// Mengimpor ikon marker
-import markerIconUrl from 'leaflet/dist/images/marker-icon.png';
-import markerIconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
-import markerShadowUrl from 'leaflet/dist/images/marker-shadow.png';
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
-// Mengatur ikon marker
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIconRetinaUrl,
-  iconUrl: markerIconUrl,
-  shadowUrl: markerShadowUrl,
-});
-
-const DetailVisit = ({ data }) => {
-  const [ipLocations, setIpLocations] = useState({});
-  console.log(data)
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    };
-    const formattedDate = date
-      .toLocaleDateString("id-ID", options)
-      .replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$1 - $2 - $3"); // Format dd - mm - yyyy
-    return formattedDate;
-  };
-
-  const fetchIpLocation = async (ip) => {
-    try {
-      const response = await axios.get(`https://ipapi.co/${ip}/json/`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching location for IP ${ip}:`, error);
-      return null;
-    }
-  };
+const TrafficChart = ({ visitorsData }) => {
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: "Number of Visits",
+        data: [],
+        fill: true,
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        tension: 0.1,
+      },
+    ],
+  });
 
   useEffect(() => {
-    const fetchLocations = async () => {
-      const uniqueIps = new Set();
-      data.forEach((day) => {
-        day.visits.forEach((visit) => {
-          uniqueIps.add(visit.ip);
+    if (visitorsData.length > 0) {
+      const groupedByIP = {};
+
+      visitorsData.forEach((visitor) => {
+        visitor.visits.forEach((visit) => {
+          const ip = visit.ip;
+
+          if (!groupedByIP[ip]) {
+            groupedByIP[ip] = 0;
+          }
+          groupedByIP[ip]++;
         });
       });
 
-      const locations = {};
-      for (const ip of uniqueIps) {
-        const locationData = await fetchIpLocation(ip);
-        if (locationData) {
-          locations[ip] = locationData;
-        }
-      }
-      setIpLocations(locations);
-    };
+      const labels = visitorsData.map((visitor) =>
+        format(new Date(visitor.date), "dd - MM - yyyy")
+      ); // Mengubah format tanggal
+      const dataValues = visitorsData.map((visitor) => visitor.totalVisits);
 
-    fetchLocations();
-  }, [data]);
+      setChartData({
+        labels: labels,
+        datasets: [
+          {
+            label: "Pengunjung",
+            data: dataValues,
+            fill: true,
+            backgroundColor: "rgba(75, 192, 192, 0.2)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            tension: 0.1,
+          },
+        ],
+      });
 
-  // Mendapatkan tanggal hari ini sesuai dengan zona waktu Jakarta
-  const todayString = moment().tz('Asia/Jakarta').format('YYYY-MM-DD');
-
-  // Menyaring data untuk hari ini saja
-  const todayData = data.filter(day => day.date.startsWith(todayString));
+      console.log("Grouped visitors by IP:", groupedByIP); // Melihat hasil gruping
+    }
+  }, [visitorsData]);
 
   return (
-    <div className="p-6 bg-gray-50 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-4">Detail Kunjungan Hari Ini</h2>
-      {todayData.length === 0 ? (
-        <p className="text-gray-600">Tidak ada kunjungan hari ini.</p>
-      ) : (
-        todayData.map((day) => (
-          <div key={day.date} className="mb-6 bg-white p-4 rounded-lg shadow">
-            <div className="flex justify-between">
-              <h3 className="text-xl font-bold mb-2">{formatDate(day.date)}</h3>
-              <p className="text-gray-600">
-                <strong>Total Visits:</strong> {day.totalVisits}
-              </p>
-            </div>
+    <div className="flex justify-center mt-8">
+      <div style={{ height: "400px", width: "80%" }}>
+        {chartData.datasets[0].data.length === 1 ? (
+          <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const label = context.dataset.label || "";
+                      const date = context.label;
+                      const visits =
+                        visitorsData.find(
+                          (visitor) =>
+                            format(new Date(visitor.date), "dd - MM - yyyy") ===
+                            date
+                        )?.visits || [];
+                      const totalVisits = visits.length;
+                      return `${label}: ${totalVisits} visits`;
+                    },
+                    footer: function (context) {
+                      const date = context[0].label;
+                      const visits =
+                        visitorsData.find(
+                          (visitor) =>
+                            format(new Date(visitor.date), "dd - MM - yyyy") ===
+                            date
+                        )?.visits || [];
+                      const groupedVisits = {};
 
-            {/* Mengelompokkan kunjungan berdasarkan IP */}
-            {Object.entries(
-              day.visits.reduce((acc, visit) => {
-                if (!acc[visit.ip]) {
-                  acc[visit.ip] = [];
-                }
-                acc[visit.ip].push(visit);
-                return acc;
-              }, {})
-            ).map(([ip, visitsGroup]) => (
-              <div key={ip} className="mb-4 border-t border-gray-200 pt-4">
-                <p className="font-semibold text-lg">
-                  <strong>IP:</strong> {ip}
-                </p>
-                {ipLocations[ip] && (
-                  <p className="text-gray-600">
-                    <strong>Location:</strong> {ipLocations[ip].city},{" "}
-                    {ipLocations[ip].region}, {ipLocations[ip].country}
-                  </p>
-                )}
-                {visitsGroup.map((visit, index) => (
-                  <div
-                    key={index}
-                    className="mb-2 p-2 border border-gray-300 rounded"
-                  >
-                    <p className="font-medium">
-                      <strong>Page:</strong>{" "}
-                      <a
-                        href={`https://boezangapple.com${visit.page}`}
-                        className="text-blue-500 hover:underline"
-                      >
-                        {visit.page}
-                      </a>
-                    </p>
-                    <p className="font-medium">Device Info:</p>
-                    <ul className="list-disc list-inside text-gray-700">
-                      <li>
-                        <strong>User Agent:</strong> {visit.device.ua}
-                      </li>
-                      <li>
-                        <strong>Browser:</strong> {visit.device.browser.name}{" "}
-                        {visit.device.browser.version}
-                      </li>
-                      <li>
-                        <strong>Operating System:</strong> {visit.device.os.name}{" "}
-                        {visit.device.os.version}
-                      </li>
-                      <li>
-                        <strong>CPU Architecture:</strong>{" "}
-                        {visit.device.cpu.architecture}
-                      </li>
-                    </ul>
-                    <p className="text-gray-600">
-                      <strong>Visit Time:</strong>{" "}
-                      {new Date(visit.visitTime).toLocaleString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        ))
-      )}
-      
-      {/* Peta untuk menampilkan lokasi pengunjung */}
-      <h3 className="text-xl font-bold mb-2">Peta Lokasi Pengunjung</h3>
-      <MapContainer center={[-6.200000, 106.816666]} zoom={2} style={{ height: "400px", width: "100%" }}>
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        {/* Menampilkan marker untuk setiap lokasi IP unik */}
-        {Object.entries(ipLocations).map(([ip, location]) => (
-          <Marker key={ip} position={[location.latitude, location.longitude]}>
-            <Popup>
-              {location.city}, {location.region}, {location.country}
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+                      visits.forEach((visit) => {
+                        const ip = visit.ip;
+                        if (!groupedVisits[ip]) {
+                          groupedVisits[ip] = 0;
+                        }
+                        groupedVisits[ip]++;
+                      });
+
+                      const details = Object.entries(groupedVisits)
+                        .map(([ip, count]) => `IP: ${ip} (${count})`)
+                        .join("\n");
+                      return details || "No visits";
+                    },
+                  },
+                },
+              },
+            }}
+          />
+        ) : (
+          <Line
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const label = context.dataset.label || "";
+                      const date = context.label;
+                      const visits =
+                        visitorsData.find(
+                          (visitor) =>
+                            format(new Date(visitor.date), "dd - MM - yyyy") ===
+                            date
+                        )?.visits || [];
+                      const totalVisits = visits.length;
+                      return `${label}: ${totalVisits} visits`;
+                    },
+                    footer: function (context) {
+                      const date = context[0].label;
+                      const visits =
+                        visitorsData.find(
+                          (visitor) =>
+                            format(new Date(visitor.date), "dd - MM - yyyy") ===
+                            date
+                        )?.visits || [];
+                      const groupedVisits = {};
+
+                      visits.forEach((visit) => {
+                        const ip = visit.ip;
+                        if (!groupedVisits[ip]) {
+                          groupedVisits[ip] = 0;
+                        }
+                        groupedVisits[ip]++;
+                      });
+
+                      const details = Object.entries(groupedVisits)
+                        .map(([ip, count]) => `IP: ${ip} (${count})`)
+                        .join("\n");
+                      return details || "No visits";
+                    },
+                  },
+                },
+              },
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };
 
-export default DetailVisit;
+export default TrafficChart;

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 // Mengimpor ikon marker
-import markerIconUrl from 'leaflet/dist/images/marker-icon.png';
-import markerIconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
-import markerShadowUrl from 'leaflet/dist/images/marker-shadow.png';
+import markerIconUrl from "leaflet/dist/images/marker-icon.png";
+import markerIconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
+import markerShadowUrl from "leaflet/dist/images/marker-shadow.png";
 
 // Mengatur ikon marker
 delete L.Icon.Default.prototype._getIconUrl;
@@ -66,20 +66,13 @@ const DetailVisit = ({ data }) => {
     fetchLocations();
   }, [data]);
 
-  // Mendapatkan tanggal hari ini sesuai dengan zona waktu Jakarta
-  const getJakartaDateString = () => {
-    const jakartaOffset = 7 * 60; // Jakarta is UTC+7
-    const localOffset = new Date().getTimezoneOffset();
-    const utcTimestamp = Date.now() + (localOffset * 60 * 1000);
-    const jakartaTimestamp = utcTimestamp + (jakartaOffset * 60 * 1000);
-    const jakartaDate = new Date(jakartaTimestamp);
-    return jakartaDate.toISOString().split('T')[0];
-  };
-
-  const todayString = getJakartaDateString();
+  // Mendapatkan tanggal hari ini
+  const today = new Date();
+  today.setHours(today.getHours() + 7); // Menyesuaikan ke WIB
+  const todayString = today.toISOString().split("T")[0]; // Format YYYY-MM-DD
 
   // Menyaring data untuk hari ini saja
-  const todayData = data.filter(day => day.date.startsWith(todayString));
+  const todayData = data.filter((day) => day.date.startsWith(todayString));
 
   return (
     <div className="p-6 bg-gray-50 rounded-lg shadow-md">
@@ -116,53 +109,63 @@ const DetailVisit = ({ data }) => {
                     {ipLocations[ip].region}, {ipLocations[ip].country}
                   </p>
                 )}
-                {visitsGroup.map((visit, index) => (
-                  <div
-                    key={index}
-                    className="mb-2 p-2 border border-gray-300 rounded"
-                  >
-                    <p className="font-medium">
-                      <strong>Page:</strong>{" "}
-                      <a
-                        href={`https://boezangapple.com${visit.page}`}
-                        className="text-blue-500 hover:underline"
-                      >
-                        {visit.page}
-                      </a>
-                    </p>
-                    <p className="font-medium">Device Info:</p>
-                    <ul className="list-disc list-inside text-gray-700">
-                      <li>
-                        <strong>User Agent:</strong> {visit.device.ua}
-                      </li>
-                      <li>
-                        <strong>Browser:</strong> {visit.device.browser.name}{" "}
-                        {visit.device.browser.version}
-                      </li>
-                      <li>
-                        <strong>Operating System:</strong> {visit.device.os.name}{" "}
-                        {visit.device.os.version}
-                      </li>
-                      <li>
-                        <strong>CPU Architecture:</strong>{" "}
-                        {visit.device.cpu.architecture}
-                      </li>
-                    </ul>
-                    <p className="text-gray-600">
-                      <strong>Visit Time:</strong>{" "}
-                      {new Date(visit.visitTime).toLocaleString()}
-                    </p>
-                  </div>
-                ))}
+                {visitsGroup.map((visit, index) => {
+                  const deviceInfo = JSON.parse(visit.device); // Mengurai string JSON ke objek
+
+                  return (
+                    <div
+                      key={index}
+                      className="mb-2 p-2 border border-gray-300 rounded"
+                    >
+                      <p className="font-medium">
+                        <strong>Page:</strong>{" "}
+                        <a
+                          href={`https://boezangapple.com${visit.page}`}
+                          className="text-blue-500 hover:underline"
+                        >
+                          {visit.page}
+                        </a>
+                      </p>
+                      <p className="font-medium">Device Info:</p>
+                      <ul className="list-disc list-inside text-gray-700">
+                        <li>
+                          <strong>User Agent:</strong> {deviceInfo?.ua || "N/A"}
+                        </li>
+                        <li>
+                          <strong>Browser:</strong>{" "}
+                          {deviceInfo?.browser?.name || "N/A"}{" "}
+                          {deviceInfo?.browser?.version || "N/A"}
+                        </li>
+                        <li>
+                          <strong>Operating System:</strong>{" "}
+                          {deviceInfo?.os?.name || "N/A"}{" "}
+                          {deviceInfo?.os?.version || "N/A"}
+                        </li>
+                        <li>
+                          <strong>CPU Architecture:</strong>{" "}
+                          {deviceInfo?.cpu?.architecture || "N/A"}
+                        </li>
+                      </ul>
+                      <p className="text-gray-600">
+                        <strong>Visit Time:</strong>{" "}
+                        {new Date(visit.visitTime).toLocaleString()}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
         ))
       )}
-      
+
       {/* Peta untuk menampilkan lokasi pengunjung */}
       <h3 className="text-xl font-bold mb-2">Lokasi Pengunjung</h3>
-      <MapContainer center={[-6.200000, 106.816666]} zoom={2} style={{ height: "400px", width: "100%" }}>
+      <MapContainer
+        center={[-6.2, 106.816666]}
+        zoom={2}
+        style={{ height: "400px", width: "100%" }}
+      >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
