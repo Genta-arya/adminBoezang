@@ -29,7 +29,7 @@ const DetailVisit = ({ data }) => {
 
   const fetchIpLocation = async (ip) => {
     try {
-      const response = await axios.get(`https://ipinfo.io/${ip}/json`);
+      const response = await axios.get(`https://ipinfo.io/${ip}?token=43fd0d149673e2`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching location for IP ${ip}:`, error);
