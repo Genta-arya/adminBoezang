@@ -209,7 +209,7 @@ const DetailVisit = ({ data }) => {
                     animate={{ scale: expandedIps.has(ip) ? 1 : 1.1 }} // Scale saat dibuka/tutup
                     transition={{ type: "spring", stiffness: 300 }} // Transisi untuk efek bounce
                   >
-                    {expandedIps.has(ip) ? "Tutup Detail" : <FaChevronDown className="animate-bounce" />}
+                    {expandedIps.has(ip) ? "Tutup Detail" : <FaChevronDown className="mt-4 animate-bounce" />}
                   </motion.button>
                 </div>
               </div>
