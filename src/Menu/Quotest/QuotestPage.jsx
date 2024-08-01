@@ -1,12 +1,13 @@
 import React from "react";
-import HeaderQuotest from "./components/HeaderQuotest";
 import ListQuotest from "./components/ListQuotest";
-import { ToastContainer } from "react-toastify";
+import { Helmet } from "react-helmet-async";
 
 const QuotestPage = () => {
   return (
     <main>
- 
+       <Helmet>
+        <title>Quote - Boezang Apple</title>
+      </Helmet>
       <ListQuotest />
     
     </main>

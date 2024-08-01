@@ -14,7 +14,9 @@ const LoadingLottie = () => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
-
+      <Helmet>
+        <title>Memuat Data... - Boezang Apple</title>
+      </Helmet>
       <div className="w-40 h-64">
         <Lottie animationData={animationData} autoplay loop />
       </div>

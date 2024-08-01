@@ -6,6 +6,7 @@ import { createOtp } from "../../services/Auth/AuthApi";
 import useLoadingStores from "../../Zustand/useLoadingStore";
 import { message } from "antd";
 import LoadingLottie from "../../components/Loading";
+import { Helmet } from "react-helmet-async";
 
 const AkunPage = () => {
   const { email } = useAuthStore();
@@ -29,6 +30,9 @@ const AkunPage = () => {
 
   return (
     <>
+     <Helmet>
+        <title>Akun - Boezang Apple</title>
+      </Helmet>
       <HeaderAkun />
       <div className="py-12 px-4 flex flex-col items-center">
         <div className="max-w-2xl flex flex-col">

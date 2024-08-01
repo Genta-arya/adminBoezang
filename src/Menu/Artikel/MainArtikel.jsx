@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import HeaderArtikel from "./components/Header";
 import ListArtikel from "./components/ListArtikel";
 import { getArtikel } from "../../services/Artikel/ArtikelApi";
+import { Helmet } from "react-helmet-async";
 
 const MainArtikel = () => {
   const [artikels, setArtikels] = useState([]);
@@ -23,13 +24,15 @@ const MainArtikel = () => {
   }, []);
   return (
     <main>
+      <Helmet>
+        <title>Event & Promo - Boezang Apple</title>
+      </Helmet>
       <HeaderArtikel refresh={fetchArtikels} />{" "}
       <ListArtikel
         refresh={fetchArtikels}
         artikels={artikels}
         loading={loading}
         error={error}
-      
       />
     </main>
   );

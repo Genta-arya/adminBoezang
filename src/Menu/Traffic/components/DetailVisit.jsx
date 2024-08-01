@@ -1,21 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-
-// Importing marker icon
-import markerIconUrl from "leaflet/dist/images/marker-icon.png";
-import markerIconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
-import markerShadowUrl from "leaflet/dist/images/marker-shadow.png";
-
-// Configuring marker icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIconRetinaUrl,
-  iconUrl: markerIconUrl,
-  shadowUrl: markerShadowUrl,
-});
+import { FaChevronDown } from "react-icons/fa";
+import Maps from "./Maps";
+import { motion } from "framer-motion";
 
 // Function to get flag URL based on country code
 const getFlagUrl = (countryCode) => {
@@ -24,6 +11,7 @@ const getFlagUrl = (countryCode) => {
 
 const DetailVisit = ({ data }) => {
   const [ipLocations, setIpLocations] = useState({});
+  const [expandedIps, setExpandedIps] = useState(new Set());
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -78,6 +66,18 @@ const DetailVisit = ({ data }) => {
     fetchLocations();
   }, [data]);
 
+  const toggleExpandIp = (ip) => {
+    setExpandedIps((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(ip)) {
+        newSet.delete(ip);
+      } else {
+        newSet.add(ip);
+      }
+      return newSet;
+    });
+  };
+
   // Getting today's date
   const today = new Date();
   today.setHours(today.getHours() + 7); // Adjusting to WIB
@@ -114,14 +114,19 @@ const DetailVisit = ({ data }) => {
               <div key={ip} className="mb-4 border-t border-gray-200 pt-4">
                 <div className="flex justify-between">
                   <div className="flex flex-col">
-                    <p className="font-semibold text-lg">
-                      <strong>IP:</strong> {ip}
+                    <p
+                      className="font-semibold text-lg cursor-pointer"
+                      onClick={() => toggleExpandIp(ip)}
+                    >
+                      <strong>IP:</strong> {ip} ({visitsGroup.length})
                     </p>
-                    {ipLocations[ip] && (
+                    {ipLocations[ip] ? (
                       <p className="text-gray-600">
                         <strong>Location:</strong> {ipLocations[ip].city},{" "}
                         {ipLocations[ip].region}, {ipLocations[ip].country}
                       </p>
+                    ) : (
+                      <>Memuat Lokasi...</>
                     )}
                   </div>
                   {ipLocations[ip] && (
@@ -132,65 +137,81 @@ const DetailVisit = ({ data }) => {
                     />
                   )}
                 </div>
-                {visitsGroup.map((visit, index) => {
-                  const deviceInfo = JSON.parse(visit.device); // Parsing JSON string to object
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }} // Initial state
+                  animate={expandedIps.has(ip) ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }} // Animation based on expanded state
+                  transition={{ duration: 0.3 }} // Durasi transisi
+                  className="overflow-hidden" // Menghindari overflow saat ditutup
+                >
+                  {visitsGroup.map((visit, index) => {
+                    const deviceInfo = JSON.parse(visit.device); // Parsing JSON string to object
 
-                  return (
-                    <div
-                      key={index}
-                      className="mb-2 p-2 border border-gray-300 rounded"
-                    >
-                      <p className="font-medium">
-                        <strong>URL:</strong>{" "}
-                        <a
-                          href={`https://boezangapple.com${visit.page}`}
-                          className="text-gray-500 font-bold hover:underline"
-                        >
-                          https://boezangapple.com{visit.page}
-                        </a>
-                      </p>
-                      <p className="font-medium">Device Info:</p>
-                      <ul className="list-disc list-inside text-gray-700">
-                        <li>
-                          <strong>User Agent:</strong> {deviceInfo?.ua || "N/A"}
-                        </li>
-                        <li>
-                          <strong>Browser:</strong>{" "}
-                          {deviceInfo?.browser?.name || "N/A"}{" "}
-                          {deviceInfo?.browser?.version || "N/A"}
-                        </li>
-                        <li>
-                          <strong>Operating System:</strong>{" "}
-                          {deviceInfo?.os?.name || "N/A"}{" "}
-                          {deviceInfo?.os?.version || "N/A"}
-                        </li>
-                        <li>
-                          <strong>CPU Architecture:</strong>{" "}
-                          {deviceInfo?.cpu?.architecture || "-"}
-                        </li>
-                      </ul>
-                      <p className="text-gray-600">
-                        <strong>Jam:</strong>{" "}
-                        {(() => {
-                          const adjustedVisitTime = new Date(visit.visitTime);
-                          adjustedVisitTime.setHours(
-                            adjustedVisitTime.getHours() - 7
-                          );
-                          return adjustedVisitTime
-                            .toLocaleTimeString("id-ID", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-
-                              hour12: false,
-                            })
-                            .replace(/:/g, ".");
-                        })()}
-                      </p>
-
-                      {/* Adding the flag below Visit Time */}
-                    </div>
-                  );
-                })}
+                    return (
+                      <div
+                        key={index}
+                        className="mb-2 p-2 border border-gray-300 rounded"
+                      >
+                        <p className="font-medium">
+                          <strong>URL:</strong>{" "}
+                          <a
+                            href={`https://boezangapple.com${visit.page}`}
+                            className="text-gray-500 font-bold hover:underline"
+                          >
+                            https://boezangapple.com{visit.page}
+                          </a>
+                        </p>
+                        <p className="font-medium">Device Info:</p>
+                        <ul className="list-disc list-inside text-gray-700">
+                          <li>
+                            <strong>User Agent:</strong>{" "}
+                            {deviceInfo?.ua || "N/A"}
+                          </li>
+                          <li>
+                            <strong>Browser:</strong>{" "}
+                            {deviceInfo?.browser?.name || "N/A"}{" "}
+                            {deviceInfo?.browser?.version || "N/A"}
+                          </li>
+                          <li>
+                            <strong>Operating System:</strong>{" "}
+                            {deviceInfo?.os?.name || "N/A"}{" "}
+                            {deviceInfo?.os?.version || "N/A"}
+                          </li>
+                          <li>
+                            <strong>CPU Architecture:</strong>{" "}
+                            {deviceInfo?.cpu?.architecture || "-"}
+                          </li>
+                        </ul>
+                        <p className="text-gray-600">
+                          <strong>Jam:</strong>{" "}
+                          {(() => {
+                            const adjustedVisitTime = new Date(visit.visitTime);
+                            adjustedVisitTime.setHours(
+                              adjustedVisitTime.getHours() - 7
+                            );
+                            return adjustedVisitTime
+                              .toLocaleTimeString("id-ID", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              })
+                              .replace(/:/g, ".");
+                          })()}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </motion.div>
+                <div className="flex justify-center">
+                  <motion.button
+                    onClick={() => toggleExpandIp(ip)}
+                    className="text-black font-bold hover:underline text-center"
+                    initial={{ scale: 1 }} // Scale awal
+                    animate={{ scale: expandedIps.has(ip) ? 1 : 1.1 }} // Scale saat dibuka/tutup
+                    transition={{ type: "spring", stiffness: 300 }} // Transisi untuk efek bounce
+                  >
+                    {expandedIps.has(ip) ? "Tutup Detail" : <FaChevronDown className="animate-bounce" />}
+                  </motion.button>
+                </div>
               </div>
             ))}
           </div>
@@ -199,51 +220,7 @@ const DetailVisit = ({ data }) => {
 
       {/* Map to show visitor locations */}
       <h3 className="text-xl font-bold mb-2">Lokasi Pengunjung</h3>
-      <MapContainer
-        center={[0, 0]} // Center coordinates of the world
-        zoom={1}
-        scrollWheelZoom={false}
-        className="rounded-lg"
-        style={{ height: "400px", width: "100%" }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          opacity={0.9}
-        />
-        {/* Showing markers for each unique IP location */}
-        {Object.entries(ipLocations).map(([ip, location]) => {
-          if (location.loc) {
-            const [latitude, longitude] = location.loc.split(",").map(Number); // Parsing latitude and longitude
-            return (
-              <Marker key={ip} position={[latitude, longitude]}>
-                <Popup>
-                  <div>
-                    <h4 className="font-semibold">{location.city}</h4>
-                    <p>
-                      {location.region}, {location.country}
-                    </p>
-                    <p>
-                      <strong>IP:</strong> {ip}
-                    </p>
-                  </div>
-                </Popup>
-                {/* Adding a circle at the location */}
-                <Circle
-                  center={[latitude, longitude]}
-                  radius={50000} // Radius in meters
-                  pathOptions={{
-                    color: "blue",
-                    fillColor: "blue",
-                    fillOpacity: 0.1,
-                  }}
-                />
-              </Marker>
-            );
-          }
-          return null; // If location does not have loc property, skip rendering
-        })}
-      </MapContainer>
+      <Maps ipLocations={ipLocations} />
     </div>
   );
 };

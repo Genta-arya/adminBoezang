@@ -3,6 +3,7 @@ import { HiEye, HiEyeOff } from "react-icons/hi";
 
 import { toast, ToastContainer } from "react-toastify";
 import useCheckLogin from "../Hooks/Auth/UseCheckLogin";
+import { Helmet } from "react-helmet-async";
 
 const AuthPage = () => {
   const {
@@ -16,6 +17,9 @@ const AuthPage = () => {
   } = useCheckLogin();
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
+       <Helmet>
+        <title>Login - Boezang Apple</title>
+      </Helmet>
       <div className="bg-white p-8 rounded shadow-md max-w-md w-full">
         <h2 className="text-2xl font-bold mb-8 text-center">Boezang Apple</h2>
         <form onSubmit={handleFormSubmit}>
