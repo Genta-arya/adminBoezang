@@ -57,7 +57,7 @@ const TrafficChart = ({ visitorsData }) => {
       });
 
       const labels = visitorsData.map((visitor) =>
-        format(new Date(visitor.date), "dd - MM - yyyy")
+        format(new Date(visitor.date), "dd/MM")
       ); // Mengubah format tanggal
       const dataValues = visitorsData.map((visitor) => visitor.totalVisits);
 
@@ -65,7 +65,7 @@ const TrafficChart = ({ visitorsData }) => {
         labels: labels,
         datasets: [
           {
-            label: "Pengunjung",
+            label: `Tahun ${new Date().getFullYear()}`,
             data: dataValues,
             fill: true,
             backgroundColor: "rgba(75, 192, 192, 0.2)",
@@ -97,7 +97,7 @@ const TrafficChart = ({ visitorsData }) => {
                       const visits =
                         visitorsData.find(
                           (visitor) =>
-                            format(new Date(visitor.date), "dd - MM - yyyy") ===
+                            format(new Date(visitor.date), "dd/MM") ===
                             date
                         )?.visits || [];
                       const totalVisits = visits.length;
@@ -108,7 +108,7 @@ const TrafficChart = ({ visitorsData }) => {
                       const visits =
                         visitorsData.find(
                           (visitor) =>
-                            format(new Date(visitor.date), "dd - MM - yyyy") ===
+                            format(new Date(visitor.date), "dd/MM") ===
                             date
                         )?.visits || [];
                       const groupedVisits = {};
@@ -146,7 +146,7 @@ const TrafficChart = ({ visitorsData }) => {
                       const visits =
                         visitorsData.find(
                           (visitor) =>
-                            format(new Date(visitor.date), "dd - MM - yyyy") ===
+                            format(new Date(visitor.date), "dd/MM") ===
                             date
                         )?.visits || [];
                       const totalVisits = visits.length;
@@ -157,7 +157,7 @@ const TrafficChart = ({ visitorsData }) => {
                       const visits =
                         visitorsData.find(
                           (visitor) =>
-                            format(new Date(visitor.date), "dd - MM - yyyy") ===
+                            format(new Date(visitor.date), "dd/MM") ===
                             date
                         )?.visits || [];
                       const groupedVisits = {};
