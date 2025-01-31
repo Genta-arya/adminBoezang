@@ -7,6 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { message } from "antd";
 import { PulseLoader } from "react-spinners";
 import { getSingleProduct } from "../../../services/Products/Products";
+import LoadingLottie from "../../../components/Loading";
 
 // Component to create promo for a product
 const ModalPromo = ({ products, isOpen, onClose, refresh }) => {
@@ -15,6 +16,7 @@ const ModalPromo = ({ products, isOpen, onClose, refresh }) => {
   const [variants, setVariants] = useState([]);
   const [discount, setDiscount] = useState("");
   const [status, setStatus] = useState(true);
+
 
   const [expiryDate, setExpiryDate] = useState(new Date());
   const [loading, setLoading] = useState(false);
@@ -102,6 +104,7 @@ const ModalPromo = ({ products, isOpen, onClose, refresh }) => {
     value: product.id,
     label: product.name,
   }));
+  if (loading) return <LoadingLottie />;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">

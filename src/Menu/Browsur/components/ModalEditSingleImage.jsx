@@ -33,14 +33,14 @@ const ModalEditSingleImage = ({ onClose, isOpen, data, refresh }) => {
           message.error("Gagal upload gambar");
         }
       } catch (error) {
-        // if (error.response.status === 400) {
-        //   message.error("Gambar Pop Up gagal diupdate");
-        // }
-        // if (error.response.status === 500) {
-        //   message.error("Terjadi kesalahan pada server");
-        //   navigate("/login");
-        //   localStorage.removeItem("_token");
-        // }
+        if (error.response.status === 400) {
+          message.error("Gambar Pop Up gagal diupdate");
+        }
+        if (error.response.status === 500) {
+          message.error("Terjadi kesalahan pada server");
+          navigate("/login");
+          localStorage.removeItem("_token");
+        }
       } finally {
         setLoading(false);
       }

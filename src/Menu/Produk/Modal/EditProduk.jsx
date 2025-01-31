@@ -24,6 +24,7 @@ const EditProduk = ({ onClose, refresh, productId }) => {
   const [category, setCategory] = useState("");
   const [image, setImage] = useState(null);
   const [imageUpload , setImageUpload] = useState(null);
+
   const [variants, setVariants] = useState([
     {
       name: "produk",
@@ -120,7 +121,7 @@ const EditProduk = ({ onClose, refresh, productId }) => {
     }
 
     const externalIds = product.variants.map((variant) => variant.externalId);
-
+ setLoading(true);
     try {
       let imageUrl = null;
 
@@ -151,6 +152,8 @@ const EditProduk = ({ onClose, refresh, productId }) => {
     } catch (error) {
       console.error("Error updating product:", error);
       alert("Failed to update product");
+    } finally {
+      setLoading(false);
     }
   };
 

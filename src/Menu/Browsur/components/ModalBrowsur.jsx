@@ -2,11 +2,13 @@ import React, { useRef, useState } from "react";
 import { createBrowsur } from "../../../services/Browsur/BrowsurService";
 import { message } from "antd";
 import { UploadImageArray } from "../../../services/Upload/UploadImage";
+import LoadingLottie from "../../../components/Loading";
 
 const ModalBrowsur = ({ isOpen, onClose, refresh }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState(true);
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -29,7 +31,7 @@ const ModalBrowsur = ({ isOpen, onClose, refresh }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    setLoading(true);
     try {
       // Menggunakan UploadImage untuk upload setiap file
       const formData = new FormData();
@@ -57,16 +59,18 @@ const ModalBrowsur = ({ isOpen, onClose, refresh }) => {
       setSelectedFiles([]);
       fileInputRef.current.value = "";
     } catch (error) {
-      // if (error.response?.status === 400) {
-      //   message.info(error.response.data.message);
-      // } else {
-      //   message.error("Terjadi kesalahan pada server");
-      //   localStorage.removeItem("_token");
-      // }
+      if (error.response?.status === 400) {
+        message.info(error.response.data.message);
+      } else {
+        message.error("Terjadi kesalahan pada server");
+        localStorage.removeItem("_token");
+      }
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
-
+ if (loading) return <LoadingLottie />
   return (
     <>
       {isOpen && (
