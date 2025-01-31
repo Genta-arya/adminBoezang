@@ -65,16 +65,7 @@ const Sidebar = () => {
             </a>
           </li>
 
-          <li className="mb-4">
-            <a
-              onClick={() => setActiveMenu("event")}
-              className={`flex items-center p-2 cursor-pointer rounded ${
-                activeMenu === "event" ? "bg-gray-700" : "hover:bg-gray-700"
-              }`}
-            >
-              <FaFileAlt className="mr-2" /> Event & Promo
-            </a>
-          </li>
+        
 
           <li className="mb-4">
             <a
@@ -86,16 +77,7 @@ const Sidebar = () => {
               <FaTextSlash className="mr-2" /> Quotes
             </a>
           </li>
-          <li className="mb-4">
-            <a
-              onClick={() => setActiveMenu("trafic")}
-              className={`flex items-center p-2 cursor-pointer rounded ${
-                activeMenu === "trafic" ? "bg-gray-700" : "hover:bg-gray-700"
-              }`}
-            >
-              <FaChartBar className="mr-2" /> Tracking View
-            </a>
-          </li>
+        
 
           <li className="mb-4">
             <a

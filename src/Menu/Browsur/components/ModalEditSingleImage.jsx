@@ -4,9 +4,11 @@ import { message } from "antd";
 import useLoadingStores from "../../../Zustand/useLoadingStore";
 import LoadingLottie from "../../../components/Loading";
 import { useNavigate } from "react-router-dom";
+import { UploadImage } from "../../../services/Upload/UploadImage";
 
 const ModalEditSingleImage = ({ onClose, isOpen, data, refresh }) => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
   const { isLoading, setLoading } = useLoadingStores();
   const navigate = useNavigate();
   const handleFileChange = (e) => {
@@ -19,18 +21,26 @@ const ModalEditSingleImage = ({ onClose, isOpen, data, refresh }) => {
 
     if (selectedFile) {
       try {
-        await editSingleImage(data.browsurId, data.id, selectedFile);
-        refresh();
-        onClose();
+        const response = await UploadImage(selectedFile);
+        console.log(response.status);
+        // ambil status code nya
+        if (response.file_url) {
+          await editSingleImage(data.browsurId, data.id, response.file_url);
+          refresh();
+          onClose();
+          message.success("Gambar Pop Up berhasil diupdate");
+        } else {
+          message.error("Gagal upload gambar");
+        }
       } catch (error) {
-        if (error.response.status === 400) {
-          message.error("Gambar Pop Up gagal diupdate");
-        }
-        if (error.response.status === 500) {
-          message.error("Terjadi kesalahan pada server");
-          navigate("/login");
-          localStorage.removeItem("_token");
-        }
+        // if (error.response.status === 400) {
+        //   message.error("Gambar Pop Up gagal diupdate");
+        // }
+        // if (error.response.status === 500) {
+        //   message.error("Terjadi kesalahan pada server");
+        //   navigate("/login");
+        //   localStorage.removeItem("_token");
+        // }
       } finally {
         setLoading(false);
       }

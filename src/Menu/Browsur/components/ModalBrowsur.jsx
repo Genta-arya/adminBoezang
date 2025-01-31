@@ -1,57 +1,69 @@
 import React, { useRef, useState } from "react";
 import { createBrowsur } from "../../../services/Browsur/BrowsurService";
 import { message } from "antd";
+import { UploadImageArray } from "../../../services/Upload/UploadImage";
 
 const ModalBrowsur = ({ isOpen, onClose, refresh }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [title, setTitle] = useState("");
-
   const [status, setStatus] = useState(true);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
-    if (event.target.files.length > 2) {
+    const files = Array.from(event.target.files);
+    if (files.length > 2) {
       alert("You can only upload a maximum of 2 images");
     } else {
-      setSelectedFiles(event.target.files);
+      console.log("Files selected:", event.target.files);
+      setSelectedFiles(files);
     }
   };
 
   const handleDeleteFile = (index) => {
-    const newFiles = Array.from(selectedFiles);
-    newFiles.splice(index, 1);
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    setSelectedFiles(newFiles);
     if (newFiles.length === 0) {
-      setSelectedFiles([]);
       fileInputRef.current.value = "";
-    } else {
-      setSelectedFiles(newFiles);
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     try {
+      // Menggunakan UploadImage untuk upload setiap file
       const formData = new FormData();
-      formData.append("title", title);
-      formData.append("status", status);
-      Array.from(selectedFiles).forEach((file) => {
-        formData.append("image", file);
+
+      // Menambahkan file ke dalam FormData menggunakan 'file[]'
+      selectedFiles.forEach((file) => {
+        formData.append("file[]", file); // Pastikan nama input file di sini adalah 'file[]'
       });
 
-      const response = await createBrowsur(formData);
+      // Kirim gambar terlebih dahulu
+      const imageUrls = await UploadImageArray(formData);
+
+      const data = {
+        title: title,
+        status: status,
+        img_url: imageUrls, // Misalnya, jika URL gambar dikembalikan oleh UploadImageArray
+      };
+
+      // Kirim data lainnya ke API createBrowsur
+      const response = await createBrowsur(data);
+
       message.success("Pop up berhasil ditambahkan");
       refresh();
       onClose();
       setSelectedFiles([]);
       fileInputRef.current.value = "";
     } catch (error) {
-      if (error.response.status === 400) {
-        message.info(error.response.data.message);
-      } else {
-        message.error("Terjadi kesalahan pada server");
-
-        localStorage.removeItem("_token");
-      }
+      // if (error.response?.status === 400) {
+      //   message.info(error.response.data.message);
+      // } else {
+      //   message.error("Terjadi kesalahan pada server");
+      //   localStorage.removeItem("_token");
+      // }
+      console.log(error);
     }
   };
 
@@ -106,6 +118,7 @@ const ModalBrowsur = ({ isOpen, onClose, refresh }) => {
                   <option value={false}>Non-Aktif</option>
                 </select>
               </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Upload Gambar (Max 2)
@@ -147,6 +160,7 @@ const ModalBrowsur = ({ isOpen, onClose, refresh }) => {
                   </div>
                 )}
               </div>
+
               <div className="flex justify-end flex-col-reverse gap-2">
                 <button
                   type="button"

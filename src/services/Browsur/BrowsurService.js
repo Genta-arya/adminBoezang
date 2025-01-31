@@ -1,14 +1,8 @@
-
 import { axiosConfig } from "../AxiosConfig";
 
 export const createBrowsur = async (data) => {
   try {
-    
-    const response = await axiosConfig.post("/popup/data/upload", data, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await axiosConfig.post("/popup/data/upload", data);
 
     return response.data;
   } catch (error) {
@@ -37,45 +31,36 @@ export const EditTitle = async ({ title, id }) => {
   }
 };
 
-export const editSingleImage = async (browsurId, imageId, file) => {
-  const formData = new FormData();
-
-  formData.append("image", file); 
-
+export const editSingleImage = async (browsurId, imageId, img_url) => {
   try {
     const response = await axiosConfig.put(
       `/popup/data/edit/${browsurId}/image/${imageId}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      { img_url }
     );
 
-    return response.data; 
-  } catch (error) {
- 
-    throw error; 
-  }
-};
-
-
-export const DeleteBrowsur = async (id) => {
-    try {
-        const response = await axiosConfig.delete(`/popup/data/${id}`)
-        return response.data
-    } catch (error) {
-        throw error
-    }
-}
-
-export const UpdateStatusBrowsur = async ({ id, status }) => {
-    console.log(status)
-  try {
-    const response = await axiosConfig.put(`/popup/data/status/${id}`, { status });
     return response.data;
   } catch (error) {
     throw error;
   }
-}
+};
+
+export const DeleteBrowsur = async (id) => {
+  try {
+    const response = await axiosConfig.delete(`/popup/data/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const UpdateStatusBrowsur = async ({ id, status }) => {
+  console.log(status);
+  try {
+    const response = await axiosConfig.put(`/popup/data/status/${id}`, {
+      status,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

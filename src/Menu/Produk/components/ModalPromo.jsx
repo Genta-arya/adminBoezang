@@ -14,6 +14,7 @@ const ModalPromo = ({ products, isOpen, onClose, refresh }) => {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [variants, setVariants] = useState([]);
   const [discount, setDiscount] = useState("");
+  const [status, setStatus] = useState(true);
 
   const [expiryDate, setExpiryDate] = useState(new Date());
   const [loading, setLoading] = useState(false);

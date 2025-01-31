@@ -11,6 +11,7 @@ import {
 import LoadingLottie from "../../../components/Loading";
 import ReactQuill from "react-quill";
 import { Editor } from "@tinymce/tinymce-react";
+import { UploadImage } from "../../../services/Upload/UploadImage";
 
 const kapasitasOptions = [64, 128, 256, 512];
 
@@ -22,8 +23,15 @@ const EditProduk = ({ onClose, refresh, productId }) => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [image, setImage] = useState(null);
+  const [imageUpload , setImageUpload] = useState(null);
   const [variants, setVariants] = useState([
-    { name: "produk", kapasitas: "", price: "", colorVariants: [""], quality: "" }, // Added quality
+    {
+      name: "produk",
+      kapasitas: "",
+      price: "",
+      colorVariants: [""],
+      quality: "",
+    }, // Added quality
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -40,13 +48,14 @@ const EditProduk = ({ onClose, refresh, productId }) => {
         setSpesification(productData.spesifikasi);
         setDescription(productData.deskripsi);
         setCategory(productData.category);
+        setImage(productData.imageUrl);
         setVariants(
           productData.variants.map((variant) => ({
             name: variant.name,
             kapasitas: variant.kapasitas,
             price: variant.price,
             colorVariants: variant.colorVariants.map((color) => color.value),
-            quality: variant.quality 
+            quality: variant.quality,
           }))
         );
       } catch (error) {
@@ -65,20 +74,41 @@ const EditProduk = ({ onClose, refresh, productId }) => {
     newVariants[index][field] = value;
     setVariants(newVariants);
   };
+  const addColorVariant = (variantIndex) => {
+    const newVariants = [...variants];
+    newVariants[variantIndex].colorVariants.push("");
+    setVariants(newVariants);
+  };
 
   const addVariant = () => {
     setVariants([
       ...variants,
-      { name: "produk", kapasitas: "", price: "", colorVariants: [""], quality: "" }, // Added quality
+      {
+        name: "produk",
+        kapasitas: "",
+        price: "",
+        colorVariants: [""],
+        quality: "",
+      }, // Added quality
     ]);
+  };
+  const removeColorVariant = (variantIndex, colorIndex) => {
+    const newVariants = [...variants];
+    newVariants[variantIndex].colorVariants.splice(colorIndex, 1);
+    setVariants(newVariants);
+  };
+  const handleColorChange = (variantIndex, colorIndex, value) => {
+    const newVariants = [...variants];
+    newVariants[variantIndex].colorVariants[colorIndex] = value;
+    setVariants(newVariants);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validasi form untuk setiap variant
     for (const variant of variants) {
-    
-      if (!variant.price || !variant.colorVariants.every((color) => color) ) { // Added quality check
+      if (!variant.price || !variant.colorVariants.every((color) => color)) {
         return message.info(
           "Periksa kembali form variant tidak boleh ada yang kosong"
         );
@@ -90,21 +120,31 @@ const EditProduk = ({ onClose, refresh, productId }) => {
     }
 
     const externalIds = product.variants.map((variant) => variant.externalId);
-    const formData = new FormData();
-
-    formData.append("name", name);
-    formData.append("status", status);
-    formData.append("category", category);
-    formData.append("spesifikasi", spesifikasi);
-    formData.append("desc", description);
-    if (image) formData.append("image", image);
-    formData.append("variants", JSON.stringify(variants));
-
- 
-    formData.append("externalIds", externalIds);
 
     try {
-      await updateProduct(productId, formData);
+      let imageUrl = null;
+
+      // Jika ada gambar yang dipilih, lakukan upload menggunakan FormData
+      if (imageUpload) {
+        const uploadFoto = await UploadImage(imageUpload); // Fungsi ini harus menerima FormData
+        imageUrl = uploadFoto.file_url; // Simpan URL gambar hasil upload
+        setImage(imageUrl); // Jika perlu menyimpan URL gambar di state
+      }
+
+      // Buat objek JSON untuk dikirim ke server
+      const productData = {
+        name,
+        status,
+        category,
+        spesifikasi,
+        desc: description,
+        variants: variants,
+        externalIds,
+        img_url: image, // Menggunakan URL gambar yang sudah di-upload
+      };
+
+      // Kirim data dalam format JSON ke server
+      await updateProduct(productId, productData);
       message.success("Product updated successfully");
       onClose(false);
       refresh();
@@ -173,7 +213,7 @@ const EditProduk = ({ onClose, refresh, productId }) => {
               <label className="font-medium mb-1">Image:</label>
               <input
                 type="file"
-                onChange={(e) => setImage(e.target.files[0])}
+                onChange={(e) => setImageUpload(e.target.files[0])}
                 accept="image/*"
                 className="border border-gray-300 rounded-md p-2"
               />

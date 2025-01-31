@@ -8,6 +8,8 @@ import { message } from "antd";
 import ReactQuill from "react-quill";
 import { set } from "date-fns";
 import { Editor } from "@tinymce/tinymce-react";
+import { UploadImage } from "../../../services/Upload/UploadImage";
+import LoadingLottie from "../../../components/Loading";
 
 const kapasitasOptions = [64, 128, 256, 512];
 
@@ -16,6 +18,7 @@ const AddProduk = ({ onClose, refresh }) => {
   const [status, setStatus] = useState(true);
   const [category, setCategory] = useState("");
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
   const [spesifikasi, setSpesification] = useState("");
   const [variants, setVariants] = useState([
@@ -55,7 +58,13 @@ const AddProduk = ({ onClose, refresh }) => {
   const addVariant = () => {
     setVariants([
       ...variants,
-      { name: "produk", kapasitas: "", price: "", colorVariants: [""], quality: true },
+      {
+        name: "produk",
+        kapasitas: "",
+        price: "",
+        colorVariants: [""],
+        quality: true,
+      },
     ]);
   };
 
@@ -69,40 +78,58 @@ const AddProduk = ({ onClose, refresh }) => {
     e.preventDefault();
 
     for (const variant of variants) {
-      // Check if any required field is empty
+      // Periksa apakah ada field yang kosong
       if (!variant.price || !variant.colorVariants.every((color) => color)) {
         return message.info(
           "Periksa kembali form variant tidak boleh ada yang kosong"
         );
       }
 
-      // Specific check for category "iphone"
+      // Cek khusus untuk kategori "iphone"
       if (category === "iphone" && !variant.kapasitas) {
         return alert("Please select kapasitas for each iPhone variant.");
       }
     }
+
     if (description.length < 1) {
       return message.info("Deskripsi produk tidak boleh kosong");
     }
 
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("spesifikasi", spesifikasi);
-    formData.append("desc", description);
-    formData.append("category", category);
-    if (image) formData.append("image", image);
-    formData.append("variants", JSON.stringify(variants));
+    setLoading(true);
 
     try {
-      await createProduct(formData);
+      let img_url = null;
+      if (image) {
+        // Upload gambar
+        const uploadFoto = await UploadImage(image);
+        img_url = uploadFoto.file_url; // Menyimpan URL gambar
+        setImage(img_url); // Menyimpan URL gambar di state jika diperlukan
+      }
+
+      const productData = {
+        name,
+        spesifikasi,
+        desc: description,
+        category,
+        variants: JSON.stringify(variants),
+        img_url, // Menyertakan URL gambar jika ada
+      };
+
+      // Kirim data produk dalam format JSON
+      await createProduct(productData);
       message.success("Product added successfully");
       onClose(false);
       refresh();
     } catch (error) {
       console.error("Error adding product:", error);
       alert("Failed to add product");
+    } finally {
+      setLoading(false);
     }
   };
+  if (loading) {
+    <LoadingLottie />;
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -429,6 +456,7 @@ const AddProduk = ({ onClose, refresh }) => {
               </div>
             </button>
             <button
+              disabled={loading}
               type="submit"
               className="bg-black w-full text-white py-2 px-4 rounded-md hover:bg-gray-900"
             >

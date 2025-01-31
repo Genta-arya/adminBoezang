@@ -96,7 +96,7 @@ const ListProduk = () => {
                     <img
                       src={product.imageUrl}
                       alt={product.name}
-                      className="w-52"
+                      className="w-52 h-52 object-cover"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="flex space-x-4">
