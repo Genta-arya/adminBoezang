@@ -31,7 +31,7 @@ export const UploadImageArray = async (files) => {
 
     // Mengirim FormData ke server
     const response = await axios.post(
-      "https://mystorages.cloud/uploads.php",
+      "https://cloud.mystorages.my.id/uploads.php",
       formData, // Mengirimkan FormData, bukan objek JSON
       {
         headers: {
