@@ -4,7 +4,7 @@ export const UploadImage = async (file) => {
   console.log(file);
   try {
     const response = await axios.post(
-      "https://cloud.mystorages.my.id/uploads.php",
+      "https://clouds.mystorages.my.id/uploads.php",
       { file: file },
       {
         headers: {
