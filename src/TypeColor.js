@@ -13,7 +13,7 @@ export const DataColor = [
   { name: 'Midnight', hex: '#1A1A1A' },
   { name: 'Starlight', hex: '#F5EDE3' },
 
-  { name: 'Red (Product Red)', hex: '#FF3B30' },
+  { name: 'Red', hex: '#FF3B30' },
 
   { name: 'Blue', hex: '#0A84FF' },
   { name: 'Sierra Blue', hex: '#A7C7E7' },
@@ -37,6 +37,7 @@ export const DataColor = [
   { name: 'Sage', hex: '#9CAF88' },
   { name: 'Mist Blue', hex: '#6B85A6' },
   {name:'Cosmic Orange', hex: '#f77f2c'},
+  {name:'Deep Blue', hex:'#384672'},
 
   // Titanium (Pro series)
   { name: 'Black Titanium', hex: '#3C3C3D' },
