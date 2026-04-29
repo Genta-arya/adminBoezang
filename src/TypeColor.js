@@ -36,6 +36,7 @@ export const DataColor = [
   { name: 'Lavender', hex: '#C8A2D1' },
   { name: 'Sage', hex: '#9CAF88' },
   { name: 'Mist Blue', hex: '#6B85A6' },
+  {name:'Cosmic Orange', hex: '#f77f2c'},
 
   // Titanium (Pro series)
   { name: 'Black Titanium', hex: '#3C3C3D' },
