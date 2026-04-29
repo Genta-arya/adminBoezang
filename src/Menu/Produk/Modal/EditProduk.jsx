@@ -397,7 +397,7 @@ const EditProduk = ({ onClose, refresh, productId }) => {
     </option>
   );
     ))}
-                      ))}
+                
                     </select>
                   </div>
                 )}
