@@ -72,6 +72,15 @@ const ListProduk = () => {
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const formatStorage = (size) => {
+  if (!size) return "";
+
+  if (size >= 1024 && size % 1024 === 0) {
+    return `${size / 1024} TB`;
+  }
+
+  return `${size} GB`;
+};
 
   if (isLoading) {
     return <LoadingLottie />;
@@ -156,7 +165,7 @@ const ListProduk = () => {
                               </p>
                             </div>
                             {product.category === "iphone" && (
-                              <p>{variant.kapasitas} GB</p>
+                            <p>{formatStorage(variant.kapasitas)}</p>
                             )}
 
                             {variant.promo && variant.promo.status ? (
