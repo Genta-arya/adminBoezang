@@ -384,11 +384,19 @@ const EditProduk = ({ onClose, refresh, productId }) => {
                       required
                       className="border border-gray-300 rounded-md p-2"
                     >
-                      <option value="">Select Kapasitas</option>
-                      {kapasitasOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option} GB
-                        </option>
+                    <option value="">Select Kapasitas</option>
+{kapasitasOptions.map((option) => {
+  const label =
+    option >= 1024
+      ? `${option / 1024} TB`
+      : `${option} GB`;
+
+  return (
+    <option key={option} value={option}>
+      {label}
+    </option>
+  );
+})}
                       ))}
                     </select>
                   </div>
