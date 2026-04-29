@@ -396,7 +396,7 @@ const EditProduk = ({ onClose, refresh, productId }) => {
       {label}
     </option>
   );
-
+    ))}
                       ))}
                     </select>
                   </div>
