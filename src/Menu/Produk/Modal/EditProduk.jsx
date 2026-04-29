@@ -13,7 +13,14 @@ import ReactQuill from "react-quill";
 import { Editor } from "@tinymce/tinymce-react";
 import { UploadImage } from "../../../services/Upload/UploadImage";
 
-const kapasitasOptions = [64, 128, 256, 512];
+export const kapasitasOptions = [
+  64,
+  128,
+  256,
+  512,
+  1024, // 1 TB
+  2048  // 2 TB
+];
 
 const EditProduk = ({ onClose, refresh, productId }) => {
   const [product, setProduct] = useState(null);
